@@ -111,6 +111,12 @@ class ReportSecurityTest(unittest.TestCase):
         self.assertEqual("", build_report.sanitize_image_src(" javascript:alert(1)"))
         self.assertEqual("", build_report.sanitize_image_src("file:///etc/passwd"))
         self.assertEqual("", build_report.sanitize_image_src("data:image/svg+xml;base64,PHN2Zy8+"))
+        self.assertEqual("", build_report.sanitize_image_src("../secrets.png"))
+        self.assertEqual("", build_report.sanitize_image_src("images/../secrets.png"))
+        self.assertEqual("", build_report.sanitize_image_src("..%2fsecrets.png"))
+        self.assertEqual("", build_report.sanitize_image_src("images/%2e%2e/secrets.png"))
+        self.assertEqual("", build_report.sanitize_image_src("\\Windows\\secret.png"))
+        self.assertEqual("", build_report.sanitize_image_src("/mnt/d/secret.png"))
         self.assertEqual("", build_report.sanitize_target_url("vbscript:msgbox(1)"))
         self.assertEqual("", build_report.sanitize_target_url("JaVaScRiPt:alert(1)"))
         self.assertEqual("", build_report.sanitize_target_url("java\r\nscript:alert(1)"))
@@ -123,9 +129,27 @@ class ReportSecurityTest(unittest.TestCase):
             build_report.sanitize_image_src("images/evidence.png"),
         )
         self.assertEqual(
+            "./images/evidence.png?v=1",
+            build_report.sanitize_image_src("./images/evidence.png?v=1"),
+        )
+        self.assertEqual(
             "data:image/png;base64,QUJDRA==",
             build_report.sanitize_image_src("data:image/png;base64,QUJDRA=="),
         )
+
+    def test_relative_image_path_traversal_does_not_reach_img_sink(self) -> None:
+        fragment = build_report.render_figure_media_html(
+            {
+                "image_src": "../private/screenshot.png",
+                "box_text": "[blocked traversal]",
+                "title": "caption",
+            },
+            "finding.evidence",
+        )
+        html = build_report.render_trusted_html(fragment)
+        self.assertIn("[blocked traversal]", html)
+        self.assertNotIn("<img", html)
+        self.assertNotIn("../private/screenshot.png", html)
 
     def test_mandatory_payloads_do_not_land_in_active_sinks(self) -> None:
         finding = self.sample_finding()

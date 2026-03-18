@@ -17,8 +17,8 @@ from dataclasses import dataclass
 from functools import lru_cache
 from html import escape
 from itertools import zip_longest
-from pathlib import Path, PureWindowsPath
-from urllib.parse import quote, urlsplit
+from pathlib import Path, PurePosixPath, PureWindowsPath
+from urllib.parse import quote, unquote, urlsplit
 
 
 ROOT_DIR = Path(__file__).resolve().parent
@@ -872,8 +872,27 @@ def sanitize_url(
     return candidate
 
 
+def safe_relative_asset_url(candidate: str) -> bool:
+    if candidate.startswith(("/", "\\")):
+        return False
+    decoded = unquote(candidate)
+    if decoded.startswith(("/", "\\")):
+        return False
+    if "\\" in candidate or "\\" in decoded:
+        return False
+    decoded_parts = urlsplit(decoded)
+    if decoded_parts.scheme or decoded_parts.netloc or not decoded_parts.path:
+        return False
+    return ".." not in PurePosixPath(decoded_parts.path).parts
+
+
 def sanitize_image_src(value: object) -> str:
-    return sanitize_url(value, allowed_schemes=("https",), allow_relative=True, allow_data_image=True)
+    sanitized = sanitize_url(value, allowed_schemes=("https",), allow_relative=True, allow_data_image=True)
+    if not sanitized:
+        return ""
+    if urlsplit(sanitized).scheme:
+        return sanitized
+    return sanitized if safe_relative_asset_url(sanitized) else ""
 
 
 def sanitize_target_url(value: object) -> str:
