@@ -64,6 +64,10 @@ python3 build_report.py --dataset stress
 - 공식 PDF 생성 명령은 `python3 build_report.py --dataset default`입니다.
 - 브라우저 `Ctrl+P` 경로는 브라우저가 시간, 문서 제목, 파일 경로, 쪽수 머리글/바닥글을 붙일 수 있으므로 공식 산출 방식으로 사용하지 않습니다.
 - 빌드 스크립트는 현재 환경에서 Microsoft Edge headless를 자동 탐지해 PDF를 생성하며, 브라우저 플래그로 인쇄 머리글/바닥글을 비활성화합니다.
+- dataset JSON 값은 모두 비신뢰 입력으로 취급하며, HTML 렌더링은 escape-by-default 정책으로 처리합니다.
+- 제한적 HTML이 꼭 필요한 경우에도 dataset 문자열을 그대로 넣지 않고, 빌드 스크립트 내부에서 검증 후 생성한 trusted fragment만 사용해야 합니다.
+- URL 계열 값은 상대경로, `http(s)://`, 제한된 `data:image/*`만 허용하며 `javascript:`, `vbscript:`, `file:` 등은 차단합니다.
+- PDF 생성 시 `--allow-file-access-from-files`는 기본 비활성화입니다. 정말 필요한 개발용 점검만 `python3 build_report.py --allow-local-file-access`로 명시적으로 opt-in 하십시오.
 - 최종 제출 기준은 [`dist/report.html`](/mnt/d/취약점-보고서/dist/report.html), [`dist/report.pdf`](/mnt/d/취약점-보고서/dist/report.pdf)입니다.
 - 실제 자산으로 교체한 뒤에는 표지 로고, 증빙 이미지 잘림, 긴 표 분할, TOC 페이지 번호를 다시 확인해야 합니다.
 

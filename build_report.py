@@ -18,7 +18,7 @@ from functools import lru_cache
 from html import escape
 from itertools import zip_longest
 from pathlib import Path, PureWindowsPath
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 
 
 ROOT_DIR = Path(__file__).resolve().parent
@@ -139,12 +139,46 @@ PAGE_KEY_PATTERNS = (
     ("table-caption", re.compile(r'<div\b[^>]*\bclass="[^"]*\btable-caption\b[^"]*"[^>]*\bdata-toc-key="([^"]+)"', re.S)),
     ("figure-caption", re.compile(r'<div\b[^>]*\bclass="[^"]*\bfigure-caption\b[^"]*"[^>]*\bdata-toc-key="([^"]+)"', re.S)),
 )
+CONTROL_CHAR_RE = re.compile(r"[\x00-\x1f\x7f]")
+URL_UNSAFE_CHAR_RE = re.compile(r"[\x00-\x20\"'<>`]")
+SAFE_HTML_ATTR_NAME_RE = re.compile(r"^[a-zA-Z_:][a-zA-Z0-9:._-]*$")
+SAFE_DATA_FIELD_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+SAFE_DOM_ID_RE = re.compile(r"[^a-z0-9._:-]+")
+DATA_IMAGE_URL_RE = re.compile(r"^data:image/(?:png|jpe?g|gif|webp|svg\+xml);base64,[A-Za-z0-9+/=]+$", re.I)
+TOC_BOLD_MARKER_RE = re.compile(r"font-weight\s*:\s*bold|<\s*(?:strong|b)\b", re.I)
+
+ALLOWED_RISK_KEYS = {"high", "mid", "low"}
+ALLOWED_REPEAT_NAMES = {
+    "appendix-evidence",
+    "checklist-item",
+    "figure-index-entry",
+    "finding-evidence",
+    "finding-toc-entry",
+    "mitigation-long",
+    "mitigation-mid",
+    "mitigation-short",
+    "priority-item",
+    "summary-finding",
+    "summary-system",
+    "table-index-entry",
+    "toc-entry",
+    "tool-list",
+}
+ALLOWED_TOC_INLINE_STYLES = {"", "padding-left: 15px", "margin-top: 10px"}
+BLOCKED_URL_TEXT = "[허용되지 않는 URL]"
 
 
 @dataclass(frozen=True)
 class Block:
     html: str
     units: int
+
+
+# Dataset values are always untrusted. Only fragments built inside this module
+# from validated URLs and escaped text may cross the trust boundary as TrustedHtml.
+@dataclass(frozen=True)
+class TrustedHtml:
+    html: str
 
 
 @dataclass(frozen=True)
@@ -297,6 +331,9 @@ def browser_is_windows_executable(executable: str) -> bool:
 
 
 def to_windows_path(path: Path) -> str | None:
+    resolved = path.resolve()
+    if resolved.drive:
+        return str(resolved)
     wslpath = shutil.which("wslpath")
     if wslpath:
         result = subprocess.run(
@@ -307,7 +344,7 @@ def to_windows_path(path: Path) -> str | None:
         )
         if result.returncode == 0:
             return normalize_text(result.stdout)
-    parts = path.resolve().parts
+    parts = resolved.parts
     if len(parts) >= 4 and parts[1] == "mnt" and len(parts[2]) == 1:
         return str(PureWindowsPath(f"{parts[2].upper()}:/", *parts[3:]))
     return None
@@ -778,6 +815,120 @@ def strip_tags(value: str) -> str:
     return re.sub(r"<[^>]+>", "", value)
 
 
+def raw_text(value: object) -> str:
+    return "" if value is None else str(value)
+
+
+def strip_control_chars(value: str, *, replacement: str = "") -> str:
+    return CONTROL_CHAR_RE.sub(replacement, value)
+
+
+def escape_html_text(value: object) -> str:
+    return escape(raw_text(value), quote=False)
+
+
+def escape_html_attr(value: object) -> str:
+    return escape(strip_control_chars(raw_text(value), replacement=" "), quote=True)
+
+
+def render_trusted_html(value: object) -> str:
+    if not isinstance(value, TrustedHtml):
+        raise TypeError(f"Expected TrustedHtml, got {type(value).__name__}")
+    return value.html
+
+
+def trusted_html(value: str) -> TrustedHtml:
+    return TrustedHtml(value)
+
+
+def sanitize_url(
+    value: object,
+    *,
+    allowed_schemes: tuple[str, ...] = ("https",),
+    allow_relative: bool = True,
+    allow_data_image: bool = False,
+) -> str:
+    candidate = raw_text(value).strip()
+    if not candidate:
+        return ""
+    if URL_UNSAFE_CHAR_RE.search(candidate):
+        return ""
+    parts = urlsplit(candidate)
+    scheme = parts.scheme.lower()
+    if scheme == "data":
+        if allow_data_image and DATA_IMAGE_URL_RE.fullmatch(candidate):
+            return candidate
+        return ""
+    if scheme:
+        if scheme not in allowed_schemes:
+            return ""
+        if scheme in {"http", "https"} and not parts.netloc:
+            return ""
+        return candidate
+    if not allow_relative:
+        return ""
+    if candidate.startswith("//") or parts.netloc:
+        return ""
+    return candidate
+
+
+def sanitize_image_src(value: object) -> str:
+    return sanitize_url(value, allowed_schemes=("https",), allow_relative=True, allow_data_image=True)
+
+
+def sanitize_target_url(value: object) -> str:
+    return sanitize_url(value, allowed_schemes=("http", "https"), allow_relative=True, allow_data_image=False)
+
+
+def sanitize_display_url(value: object) -> str:
+    raw_value = raw_text(value).strip()
+    if not raw_value:
+        return ""
+    sanitized = sanitize_target_url(raw_value)
+    return sanitized or BLOCKED_URL_TEXT
+
+
+def sanitize_risk_key(value: object) -> str:
+    key = normalize_text(value).lower()
+    return key if key in ALLOWED_RISK_KEYS else "low"
+
+
+def sanitize_repeat_name(value: object) -> str:
+    name = normalize_text(value)
+    return name if name in ALLOWED_REPEAT_NAMES else "invalid-repeat"
+
+
+def sanitize_toc_style(value: object) -> str:
+    style = normalize_text(value)
+    return style if style in ALLOWED_TOC_INLINE_STYLES else ""
+
+
+def sanitize_data_field(value: object, fallback: str = "invalid.field") -> str:
+    field = strip_control_chars(raw_text(value))
+    return field if SAFE_DATA_FIELD_RE.fullmatch(field) else fallback
+
+
+def sanitize_dom_id(value: object, *, prefix: str) -> str:
+    text = normalize_text(value).lower()
+    slug = SAFE_DOM_ID_RE.sub("-", text).strip("-._:")
+    if not slug:
+        slug = prefix
+    if not slug[0].isalpha():
+        slug = f"{prefix}-{slug}"
+    return slug
+
+
+def toc_label_text(value: object) -> str:
+    return strip_tags(raw_text(value))
+
+
+def render_toc_label_fragment(value: object) -> TrustedHtml:
+    label_text = escape_html_text(toc_label_text(value))
+    if TOC_BOLD_MARKER_RE.search(raw_text(value)):
+        return trusted_html(f"<strong>{label_text}</strong>")
+    return trusted_html(f"<span>{label_text}</span>")
+
+
 def text_units(value: object, chars_per_unit: int = 95, base: int = 0) -> int:
     text = normalize_text(value)
     if not text:
@@ -820,6 +971,65 @@ def indent_block(text: str, indent: str) -> str:
     return "\n".join(f"{indent}{line}" if line else "" for line in text.splitlines())
 
 
+def template_token_context(template: str, token_start: int) -> str:
+    state = "text"
+    quote_char = ""
+    index = 0
+    while index < token_start:
+        if state == "text":
+            if template.startswith("<!--", index):
+                state = "comment"
+                index += 4
+                continue
+            if template[index] == "<":
+                state = "tag"
+                index += 1
+                continue
+            index += 1
+            continue
+        if state == "comment":
+            if template.startswith("-->", index):
+                state = "text"
+                index += 3
+                continue
+            index += 1
+            continue
+        char = template[index]
+        if quote_char:
+            if char == quote_char:
+                quote_char = ""
+            index += 1
+            continue
+        if char in {'"', "'"}:
+            quote_char = char
+            index += 1
+            continue
+        if char == ">":
+            state = "text"
+            index += 1
+            continue
+        index += 1
+    if state == "comment":
+        return "text"
+    if quote_char:
+        return "attr"
+    return state
+
+
+def render_template_token(template_name: str, key: str, value: object, *, context: str) -> str:
+    if context == "text":
+        if isinstance(value, TrustedHtml):
+            return render_trusted_html(value)
+        return escape_html_text(value)
+    if context == "attr":
+        if isinstance(value, TrustedHtml):
+            raise TypeError(f"TrustedHtml cannot be inserted into attribute context: {template_name}:{key}")
+        return escape_html_attr(value)
+    if isinstance(value, TrustedHtml):
+        return render_trusted_html(value)
+    raise TypeError(f"{template_name}:{key} requires an explicit TrustedHtml fragment")
+
+
 def render_template(template_name: str, context: dict[str, object]) -> str:
     template = read_template(template_name)
 
@@ -827,38 +1037,59 @@ def render_template(template_name: str, context: dict[str, object]) -> str:
         key = match.group(1)
         if key not in context:
             raise KeyError(f"Missing template value '{key}' for {template_name}")
-        return str(context[key])
+        return render_template_token(
+            template_name,
+            key,
+            context[key],
+            context=template_token_context(template, match.start()),
+        )
 
-    rendered = TEMPLATE_TOKEN_RE.sub(replace, template)
-    leftover = TEMPLATE_TOKEN_RE.search(rendered)
-    if leftover:
-        raise ValueError(f"Unresolved template token '{leftover.group(1)}' in {template_name}")
-    return rendered
+    return TEMPLATE_TOKEN_RE.sub(replace, template)
 
 
 def render_li_items(items: list[str], indent: str) -> str:
-    return "\n".join(f"{indent}<li>{item}</li>" for item in items)
+    return "\n".join(f"{indent}<li>{escape_html_text(item)}</li>" for item in items)
 
 
 def render_cover_logo_html(dataset: dict[str, object]) -> str:
     logo = dataset.get("_real_asset_logo")
     if not isinstance(logo, dict):
         return "[기관 로고]"
-    image_src = str(logo.get("image_src") or "").strip()
+    image_src = sanitize_image_src(logo.get("image_src"))
     if not image_src:
         return "[기관 로고]"
     return (
-        f'<img src="{image_src}" alt="기관 로고 샘플" '
+        f'<img src="{escape_html_attr(image_src)}" alt="기관 로고 샘플" '
         'style="max-width: 100%; max-height: 100%; object-fit: contain; display: block" />'
     )
 
 
 def risk_badge_class(risk_key: str) -> str:
-    return f"badge-{risk_key}"
+    return {
+        "high": "badge-high",
+        "mid": "badge-mid",
+        "low": "badge-low",
+    }[sanitize_risk_key(risk_key)]
+
+
+def priority_row_class(risk_key: str) -> str:
+    return {
+        "high": "priority-high",
+        "mid": "priority-mid",
+        "low": "priority-low",
+    }[sanitize_risk_key(risk_key)]
+
+
+def mitigation_repeat_name(track: str) -> str:
+    return sanitize_repeat_name(f"mitigation-{track}")
+
+
+def mitigation_id_classes(track: str) -> str:
+    return "auto-field" if track == "short" else "placeholder auto-field"
 
 
 def finding_dom_id(finding: dict[str, object]) -> str:
-    return f"finding-{str(finding['id']).lower()}"
+    return sanitize_dom_id(f"finding-{raw_text(finding.get('id', ''))}", prefix="finding")
 
 
 def finding_toc_key(finding: dict[str, object]) -> str:
@@ -1309,15 +1540,16 @@ def synthesize_stress_dataset(base_dataset: dict[str, object]) -> dict[str, obje
 
 
 def toc_entry_context(entry: dict[str, object]) -> dict[str, object]:
-    toc_key = str(entry["toc_key"])
-    page_key = str(entry.get("page_key", toc_key))
-    style = str(entry.get("style", ""))
+    toc_key = sanitize_dom_id(entry["toc_key"], prefix="toc")
+    page_key = sanitize_dom_id(entry.get("page_key", toc_key), prefix="page")
+    style = sanitize_toc_style(entry.get("style", ""))
+    # Safe because the visible TOC label is rebuilt from stripped text and fixed inline tags only.
     return {
-        "style_attr": f' style="{style}"' if style else "",
-        "repeat_name": entry["repeat"],
+        "item_style": style,
+        "repeat_name": sanitize_repeat_name(entry["repeat"]),
         "toc_key": toc_key,
-        "label_html": entry["label_html"],
-        "page_field": f"page.{page_key}",
+        "label_fragment": render_toc_label_fragment(entry.get("label_html", "")),
+        "page_field": sanitize_data_field(f"page.{page_key}"),
         "page_token": f"{{{{page:{page_key}}}}}",
     }
 
@@ -1334,7 +1566,7 @@ def render_finding_toc_entries(dataset: dict[str, object]) -> list[dict[str, obj
                 "repeat": "finding-toc-entry",
                 "toc_key": finding_toc_key(finding),
                 "style": "padding-left: 15px",
-                "label_html": f"<span>{finding['toc_number']} {finding['id']} · {finding['toc_title']}</span>",
+                "label_html": f"{raw_text(finding['toc_number'])} {raw_text(finding['id'])} · {raw_text(finding['toc_title'])}",
             }
         )
     return entries
@@ -1365,7 +1597,7 @@ def render_figure_index_entries(dataset: dict[str, object]) -> list[dict[str, ob
                         {
                             "repeat": "figure-index-entry",
                             "toc_key": evidence["figure_id"],
-                            "label_html": f"<span>{evidence['figure_caption']}</span>",
+                            "label_html": raw_text(evidence["figure_caption"]),
                         }
                     )
             continue
@@ -1375,7 +1607,7 @@ def render_figure_index_entries(dataset: dict[str, object]) -> list[dict[str, ob
                     {
                         "repeat": "figure-index-entry",
                         "toc_key": evidence["figure_id"],
-                        "label_html": f"<span>{evidence['figure_caption']}</span>",
+                        "label_html": raw_text(evidence["figure_caption"]),
                     }
                 )
             continue
@@ -1384,7 +1616,7 @@ def render_figure_index_entries(dataset: dict[str, object]) -> list[dict[str, ob
 
 
 def toc_item_units(entry: dict[str, object]) -> int:
-    label = strip_tags(str(entry["label_html"]))
+    label = toc_label_text(entry.get("label_html", ""))
     return max(1, math.ceil(len(normalize_text(label)) / 34))
 
 
@@ -1486,21 +1718,36 @@ def render_index_sections(dataset: dict[str, object]) -> str:
 
 
 def render_tool_list_rows(dataset: dict[str, object]) -> str:
-    return "\n".join(
-        render_template("tool-list-row.html", item) for item in dataset["diagnostic_overview"]["tool_list"]
-    )
+    rows: list[str] = []
+    for item in dataset["diagnostic_overview"]["tool_list"]:
+        rows.append(
+            render_template(
+                "tool-list-row.html",
+                {
+                    "name": item.get("name", ""),
+                    "usage": item.get("usage", ""),
+                    "note": item.get("note", ""),
+                },
+            )
+        )
+    return "\n".join(rows)
 
 
 def render_checklist_item_rows(dataset: dict[str, object]) -> str:
     rows: list[str] = []
     for item in dataset["diagnostic_overview"]["checklist_items"]:
+        risk_key = sanitize_risk_key(item.get("risk_key"))
         rows.append(
             render_template(
                 "checklist-item.html",
                 {
-                    **item,
-                    "risk_badge_class": risk_badge_class(str(item["risk_key"])),
-                    "result_field": f"checklist.result.{str(item['code']).lower()}",
+                    "code": item.get("code", ""),
+                    "name": item.get("name", ""),
+                    "point": item.get("point", ""),
+                    "risk_key": risk_key,
+                    "risk_label": item.get("risk_label", ""),
+                    "risk_badge_class": risk_badge_class(risk_key),
+                    "result_field": sanitize_data_field(f"checklist.result.{raw_text(item.get('code')).lower()}"),
                     "result_text": "[양호/취약/해당없음]",
                 },
             )
@@ -1509,20 +1756,39 @@ def render_checklist_item_rows(dataset: dict[str, object]) -> str:
 
 
 def render_summary_system_rows(dataset: dict[str, object]) -> str:
-    return "\n".join(
-        render_template("summary-system-row.html", item) for item in dataset["summary"]["systems"]
-    )
+    rows: list[str] = []
+    for item in dataset["summary"]["systems"]:
+        rows.append(
+            render_template(
+                "summary-system-row.html",
+                {
+                    "system_name": item.get("system_name", ""),
+                    "total": item.get("total", ""),
+                    "vuln": item.get("vuln", ""),
+                    "ok": item.get("ok", ""),
+                    "na": item.get("na", ""),
+                },
+            )
+        )
+    return "\n".join(rows)
 
 
 def render_summary_finding_rows(dataset: dict[str, object]) -> str:
     rows: list[str] = []
     for item in dataset["summary"]["findings"]:
+        risk_key = sanitize_risk_key(item.get("risk_key"))
         rows.append(
             render_template(
                 "summary-finding-row.html",
                 {
-                    **item,
-                    "risk_badge_class": risk_badge_class(str(item["risk_key"])),
+                    "number": item.get("number", ""),
+                    "system_name": item.get("system_name", ""),
+                    "finding_id": item.get("finding_id", ""),
+                    "title": item.get("title", ""),
+                    "risk_key": risk_key,
+                    "risk_badge_class": risk_badge_class(risk_key),
+                    "risk_label": item.get("risk_label", ""),
+                    "status": item.get("status", ""),
                 },
             )
         )
@@ -1532,12 +1798,20 @@ def render_summary_finding_rows(dataset: dict[str, object]) -> str:
 def render_priority_item_rows(dataset: dict[str, object]) -> str:
     rows: list[str] = []
     for item in dataset["summary"]["priorities"]:
+        risk_key = sanitize_risk_key(item.get("risk_key"))
         rows.append(
             render_template(
                 "priority-item-row.html",
                 {
-                    **item,
-                    "risk_badge_class": risk_badge_class(str(item["risk_key"])),
+                    "row_class": priority_row_class(risk_key),
+                    "rank": item.get("rank", ""),
+                    "finding_id": item.get("finding_id", ""),
+                    "title": item.get("title", ""),
+                    "risk_key": risk_key,
+                    "risk_badge_class": risk_badge_class(risk_key),
+                    "risk_label": item.get("risk_label", ""),
+                    "due": item.get("due", ""),
+                    "owner": item.get("owner", ""),
                 },
             )
         )
@@ -1547,13 +1821,29 @@ def render_priority_item_rows(dataset: dict[str, object]) -> str:
 def render_mitigation_rows(dataset: dict[str, object], track: str) -> list[dict[str, object]]:
     rows: list[dict[str, object]] = []
     for item in dataset["countermeasures"][track]:
+        risk_key = sanitize_risk_key(item.get("risk_key"))
         rows.append(
             {
                 "html": render_template(
                     "mitigation-row.html",
                     {
-                        **item,
-                        "risk_badge_class": risk_badge_class(str(item["risk_key"])),
+                        "repeat_name": mitigation_repeat_name(track),
+                        "risk_key": risk_key,
+                        "risk_badge_class": risk_badge_class(risk_key),
+                        "risk_label": item.get("risk_label", ""),
+                        "id_classes": mitigation_id_classes(track),
+                        "id_field": sanitize_data_field(f"mitigation.{track}.id"),
+                        "finding_id": item.get("finding_id", ""),
+                        "title_field": sanitize_data_field(f"mitigation.{track}.title"),
+                        "title": item.get("title", ""),
+                        "action_field": sanitize_data_field(f"mitigation.{track}.action"),
+                        "action": item.get("action", ""),
+                        "owner_field": sanitize_data_field(f"mitigation.{track}.owner"),
+                        "owner": item.get("owner", ""),
+                        "due_field": sanitize_data_field(f"mitigation.{track}.due"),
+                        "due": item.get("due", ""),
+                        "retest_field": sanitize_data_field(f"mitigation.{track}.retest"),
+                        "retest": item.get("retest", ""),
                     },
                 ),
                 "units": 3 + text_units(item["title"], 42) + text_units(item["action"], 92) + text_units(item["retest"], 100),
@@ -1562,38 +1852,58 @@ def render_mitigation_rows(dataset: dict[str, object], track: str) -> list[dict[
     return rows
 
 
-def render_figure_media_html(item: dict[str, object], data_prefix: str) -> str:
-    image_src = str(item.get("image_src", "")).strip()
+def render_figure_media_html(item: dict[str, object], data_prefix: str) -> TrustedHtml:
+    image_src = sanitize_image_src(item.get("image_src"))
     if not image_src:
-        return (
+        return trusted_html(
             '<div class="evidence-box large evidence-placeholder placeholder requires-input">'
-            f"{item['box_text']}</div>"
+            f"{escape_html_text(item.get('box_text', ''))}</div>"
         )
-    alt = escape(str(item.get("image_alt") or item.get("title") or "증빙 이미지"))
-    return (
+    alt = escape_html_attr(item.get("image_alt") or item.get("title") or "증빙 이미지")
+    return trusted_html(
         '<div class="evidence-box large evidence-media">'
-        f'<img src="{image_src}" alt="{alt}" class="evidence-image" data-field="{data_prefix}.image" />'
+        f'<img src="{escape_html_attr(image_src)}" alt="{alt}" class="evidence-image" data-field="{escape_html_attr(sanitize_data_field(f"{data_prefix}.image"))}" />'
         "</div>"
     )
 
 
 def render_finding_evidence(evidence: dict[str, object], finding_id: str) -> str:
+    # Safe because the media fragment is rebuilt here from validated URLs and escaped alt text only.
+    figure_media_fragment = render_figure_media_html(evidence, "finding.evidence")
     return render_template(
         "finding-evidence.html",
         {
-            **evidence,
+            "evidence_id": evidence.get("evidence_id", ""),
+            "title": evidence.get("title", ""),
+            "lead_label": evidence.get("lead_label", ""),
+            "lead_data_field": sanitize_data_field(f"finding.evidence.{raw_text(evidence.get('lead_field') or 'detail').lower()}"),
+            "lead_text": evidence.get("lead_text", ""),
+            "io_text": evidence.get("io_text", ""),
+            "appendix_ref": evidence.get("appendix_ref", ""),
             "finding_id": finding_id,
-            "figure_media_html": render_figure_media_html(evidence, "finding.evidence"),
+            "figure_media_fragment": figure_media_fragment,
+            "figure_id": sanitize_dom_id(evidence.get("figure_id", ""), prefix="figure"),
+            "figure_caption": evidence.get("figure_caption", ""),
         },
     )
 
 
 def render_appendix_panel(item: dict[str, object]) -> str:
+    # Safe because the media fragment is rebuilt here from validated URLs and escaped alt text only.
+    figure_media_fragment = render_figure_media_html(item, "appendix.evidence")
     return render_template(
         "appendix-evidence.html",
         {
-            **item,
-            "figure_media_html": render_figure_media_html(item, "appendix.evidence"),
+            "evidence_id": item.get("evidence_id", ""),
+            "finding_ref": item.get("finding_ref", ""),
+            "title": item.get("title", ""),
+            "finding_id": item.get("finding_id", ""),
+            "evidence_type": item.get("evidence_type", ""),
+            "body_ref": item.get("body_ref", ""),
+            "figure_media_fragment": figure_media_fragment,
+            "figure_id": sanitize_dom_id(item.get("figure_id", ""), prefix="figure"),
+            "figure_caption": item.get("figure_caption", ""),
+            "description": item.get("description", ""),
         },
     )
 
@@ -1613,6 +1923,8 @@ def first_finding_preamble() -> str:
 
 
 def render_meta_block(finding: dict[str, object]) -> Block:
+    risk_key = sanitize_risk_key(finding.get("risk_key"))
+    target_url = sanitize_display_url(finding.get("target_url"))
     html = f"""
 <div class="detail-grid vuln-detail-meta keep-together">
   <div class="detail-card keep-together">
@@ -1620,12 +1932,12 @@ def render_meta_block(finding: dict[str, object]) -> Block:
     <div class="detail-card-body">
       <table style="margin: 0">
         <tbody>
-          <tr><td width="26%" style="background: #f0f6ff; font-weight: bold">관리번호</td><td class="auto-field wrap-anywhere" data-field="finding.id">{finding['id']}</td></tr>
-          <tr><td style="background: #f0f6ff; font-weight: bold">대상 시스템</td><td class="placeholder requires-input auto-field wrap-anywhere" data-field="finding.targetName">{finding['target_name']}</td></tr>
-          <tr><td style="background: #f0f6ff; font-weight: bold">대상 URL</td><td class="placeholder requires-input auto-field wrap-anywhere wrap-pre" data-field="finding.targetUrl">{finding['target_url']}</td></tr>
-          <tr><td style="background: #f0f6ff; font-weight: bold">취약점명</td><td class="placeholder requires-input auto-field wrap-anywhere" data-field="finding.title">{finding['title']}</td></tr>
-          <tr><td style="background: #f0f6ff; font-weight: bold">점검 코드</td><td class="placeholder requires-input auto-field wrap-anywhere" data-field="finding.code">{finding['code']}</td></tr>
-          <tr><td style="background: #f0f6ff; font-weight: bold">발생 경로</td><td class="placeholder requires-input auto-field wrap-anywhere wrap-pre" data-field="finding.path">{finding['path']}</td></tr>
+          <tr><td width="26%" style="background: #f0f6ff; font-weight: bold">관리번호</td><td class="auto-field wrap-anywhere" data-field="finding.id">{escape_html_text(finding.get('id', ''))}</td></tr>
+          <tr><td style="background: #f0f6ff; font-weight: bold">대상 시스템</td><td class="placeholder requires-input auto-field wrap-anywhere" data-field="finding.targetName">{escape_html_text(finding.get('target_name', ''))}</td></tr>
+          <tr><td style="background: #f0f6ff; font-weight: bold">대상 URL</td><td class="placeholder requires-input auto-field wrap-anywhere wrap-pre" data-field="finding.targetUrl">{escape_html_text(target_url)}</td></tr>
+          <tr><td style="background: #f0f6ff; font-weight: bold">취약점명</td><td class="placeholder requires-input auto-field wrap-anywhere" data-field="finding.title">{escape_html_text(finding.get('title', ''))}</td></tr>
+          <tr><td style="background: #f0f6ff; font-weight: bold">점검 코드</td><td class="placeholder requires-input auto-field wrap-anywhere" data-field="finding.code">{escape_html_text(finding.get('code', ''))}</td></tr>
+          <tr><td style="background: #f0f6ff; font-weight: bold">발생 경로</td><td class="placeholder requires-input auto-field wrap-anywhere wrap-pre" data-field="finding.path">{escape_html_text(finding.get('path', ''))}</td></tr>
         </tbody>
       </table>
     </div>
@@ -1636,13 +1948,13 @@ def render_meta_block(finding: dict[str, object]) -> Block:
       <div class="detail-card-body">
         <table style="margin: 0">
           <tbody>
-            <tr><td width="34%" style="background: #f0f6ff; font-weight: bold">진단 결과</td><td class="placeholder auto-field wrap-anywhere" data-field="finding.result">{finding['result']}</td></tr>
-            <tr><td style="background: #f0f6ff; font-weight: bold">최종 위험도</td><td><span class="badge {risk_badge_class(str(finding['risk_key']))}" data-risk="{finding['risk_key']}" data-field="finding.finalRisk">{finding['risk_label']}</span></td></tr>
-            <tr><td style="background: #f0f6ff; font-weight: bold">발견일</td><td class="placeholder requires-input auto-field wrap-anywhere" data-field="finding.discoveredAt">{finding['discovered_at']}</td></tr>
-            <tr><td style="background: #f0f6ff; font-weight: bold">조치 기한</td><td class="placeholder requires-input auto-field wrap-anywhere" data-field="finding.dueAt">{finding['due_at']}</td></tr>
-            <tr><td style="background: #f0f6ff; font-weight: bold">조치 상태</td><td class="placeholder auto-field wrap-anywhere" data-field="finding.status">{finding['status']}</td></tr>
-            <tr><td style="background: #f0f6ff; font-weight: bold">담당자</td><td class="placeholder requires-input auto-field wrap-anywhere" data-field="finding.owner">{finding['owner']}</td></tr>
-            <tr><td style="background: #f0f6ff; font-weight: bold">확인자</td><td class="placeholder requires-input auto-field wrap-anywhere" data-field="finding.reviewer">{finding['reviewer']}</td></tr>
+            <tr><td width="34%" style="background: #f0f6ff; font-weight: bold">진단 결과</td><td class="placeholder auto-field wrap-anywhere" data-field="finding.result">{escape_html_text(finding.get('result', ''))}</td></tr>
+            <tr><td style="background: #f0f6ff; font-weight: bold">최종 위험도</td><td><span class="badge {risk_badge_class(risk_key)}" data-risk="{escape_html_attr(risk_key)}" data-field="finding.finalRisk">{escape_html_text(finding.get('risk_label', ''))}</span></td></tr>
+            <tr><td style="background: #f0f6ff; font-weight: bold">발견일</td><td class="placeholder requires-input auto-field wrap-anywhere" data-field="finding.discoveredAt">{escape_html_text(finding.get('discovered_at', ''))}</td></tr>
+            <tr><td style="background: #f0f6ff; font-weight: bold">조치 기한</td><td class="placeholder requires-input auto-field wrap-anywhere" data-field="finding.dueAt">{escape_html_text(finding.get('due_at', ''))}</td></tr>
+            <tr><td style="background: #f0f6ff; font-weight: bold">조치 상태</td><td class="placeholder auto-field wrap-anywhere" data-field="finding.status">{escape_html_text(finding.get('status', ''))}</td></tr>
+            <tr><td style="background: #f0f6ff; font-weight: bold">담당자</td><td class="placeholder requires-input auto-field wrap-anywhere" data-field="finding.owner">{escape_html_text(finding.get('owner', ''))}</td></tr>
+            <tr><td style="background: #f0f6ff; font-weight: bold">확인자</td><td class="placeholder requires-input auto-field wrap-anywhere" data-field="finding.reviewer">{escape_html_text(finding.get('reviewer', ''))}</td></tr>
           </tbody>
         </table>
       </div>
@@ -1650,7 +1962,7 @@ def render_meta_block(finding: dict[str, object]) -> Block:
   </div>
 </div>
 """.strip()
-    units = 18 + text_units(finding["target_url"], 70) + text_units(finding["title"], 60) + text_units(finding["path"], 70)
+    units = 18 + text_units(target_url, 70) + text_units(finding["title"], 60) + text_units(finding["path"], 70)
     return Block(html=html, units=units)
 
 
@@ -1658,7 +1970,7 @@ def render_summary_block(finding: dict[str, object]) -> Block:
     html = f"""
 <div class="summary-strip keep-together">
   <strong>한 줄 요약</strong><br />
-  <span class="placeholder requires-input auto-field wrap-anywhere wrap-pre" data-field="finding.summary">{finding['summary']}</span>
+  <span class="placeholder requires-input auto-field wrap-anywhere wrap-pre" data-field="finding.summary">{escape_html_text(finding.get('summary', ''))}</span>
 </div>
 """.strip()
     return Block(html=html, units=4 + text_units(finding["summary"], 110))
@@ -1667,8 +1979,8 @@ def render_summary_block(finding: dict[str, object]) -> Block:
 def render_text_block(title: str, field: str, value: str) -> Block:
     html = f"""
 <div class="vuln-detail-section allow-split">
-  <h3 class="subsection-title">{title}</h3>
-  <p class="placeholder requires-input auto-field wrap-anywhere wrap-pre" data-field="{field}">{value}</p>
+  <h3 class="subsection-title">{escape_html_text(title)}</h3>
+  <p class="placeholder requires-input auto-field wrap-anywhere wrap-pre" data-field="{escape_html_attr(sanitize_data_field(field))}">{escape_html_text(value)}</p>
 </div>
 """.strip()
     return Block(html=html, units=4 + text_units(value, 115))
@@ -1680,10 +1992,10 @@ def render_repro_block(finding: dict[str, object]) -> Block:
   <h3 class="subsection-title">재현 절차</h3>
   <table class="evidence-summary-table">
     <tbody>
-      <tr><td>입력값/파라미터</td><td class="placeholder requires-input auto-field wrap-anywhere wrap-pre" data-field="finding.repro.parameters">{finding['repro_parameters']}</td></tr>
-      <tr><td>요청 요약</td><td class="placeholder requires-input auto-field wrap-anywhere wrap-pre" data-field="finding.repro.request">{finding['repro_request']}</td></tr>
-      <tr><td>응답 요약</td><td class="placeholder requires-input auto-field wrap-anywhere wrap-pre" data-field="finding.repro.response">{finding['repro_response']}</td></tr>
-      <tr><td>주요 증빙 ID</td><td class="auto-field wrap-anywhere" data-field="finding.evidenceRefs">{finding['evidence_refs']}</td></tr>
+      <tr><td>입력값/파라미터</td><td class="placeholder requires-input auto-field wrap-anywhere wrap-pre" data-field="finding.repro.parameters">{escape_html_text(finding.get('repro_parameters', ''))}</td></tr>
+      <tr><td>요청 요약</td><td class="placeholder requires-input auto-field wrap-anywhere wrap-pre" data-field="finding.repro.request">{escape_html_text(finding.get('repro_request', ''))}</td></tr>
+      <tr><td>응답 요약</td><td class="placeholder requires-input auto-field wrap-anywhere wrap-pre" data-field="finding.repro.response">{escape_html_text(finding.get('repro_response', ''))}</td></tr>
+      <tr><td>주요 증빙 ID</td><td class="auto-field wrap-anywhere" data-field="finding.evidenceRefs">{escape_html_text(finding.get('evidence_refs', ''))}</td></tr>
     </tbody>
   </table>
   <ol class="step-list placeholder requires-input auto-field wrap-pre" data-field="finding.repro.steps">
@@ -1703,7 +2015,7 @@ def estimated_media_units(
 ) -> int:
     width = int(item.get("image_width") or 0)
     height = int(item.get("image_height") or 0)
-    image_src = str(item.get("image_src") or "").strip()
+    image_src = sanitize_image_src(item.get("image_src"))
     if width and height:
         metrics = estimate_image_print_metrics(width, height, max_height_mm=profile.image_max_height_print_mm)
         return max(8, math.ceil(metrics["display_height_mm"] * 0.42))
@@ -1755,7 +2067,7 @@ def render_evidence_blocks(finding: dict[str, object]) -> list[Block]:
         chunk_html = [render_finding_evidence(evidence, str(finding["id"])) for evidence in chunk]
         html = f"""
 <div class="vuln-detail-section allow-split">
-  <h3 class="subsection-title">{title}</h3>
+  <h3 class="subsection-title">{escape_html_text(title)}</h3>
   <div class="evidence-list">
 {join_blocks(chunk_html, '    ')}
   </div>
@@ -1771,11 +2083,11 @@ def render_risk_block(finding: dict[str, object]) -> Block:
 <div class="vuln-detail-section allow-split">
   <h3 class="subsection-title">위험도 및 판정 근거</h3>
   <div class="risk-rationale keep-together">
-    <p class="placeholder requires-input auto-field wrap-anywhere wrap-pre" data-field="finding.riskRationale">{finding['risk_rationale']}</p>
+    <p class="placeholder requires-input auto-field wrap-anywhere wrap-pre" data-field="finding.riskRationale">{escape_html_text(finding.get('risk_rationale', ''))}</p>
     <ul class="tight-list">
-      <li>공격 난이도: <span class="placeholder auto-field wrap-anywhere" data-field="finding.riskDifficulty">{finding['risk_difficulty']}</span></li>
-      <li>영향 자산: <span class="placeholder auto-field wrap-anywhere" data-field="finding.riskAsset">{finding['risk_asset']}</span></li>
-      <li>선행 조건: <span class="placeholder auto-field wrap-anywhere" data-field="finding.riskPrecondition">{finding['risk_precondition']}</span></li>
+      <li>공격 난이도: <span class="placeholder auto-field wrap-anywhere" data-field="finding.riskDifficulty">{escape_html_text(finding.get('risk_difficulty', ''))}</span></li>
+      <li>영향 자산: <span class="placeholder auto-field wrap-anywhere" data-field="finding.riskAsset">{escape_html_text(finding.get('risk_asset', ''))}</span></li>
+      <li>선행 조건: <span class="placeholder auto-field wrap-anywhere" data-field="finding.riskPrecondition">{escape_html_text(finding.get('risk_precondition', ''))}</span></li>
     </ul>
   </div>
 </div>
@@ -1789,8 +2101,8 @@ def render_list_block(title: str, field: str, items: list[str], ordered: bool) -
     class_name = "step-list" if ordered else "tight-list"
     html = f"""
 <div class="vuln-detail-section allow-split">
-  <h3 class="subsection-title">{title}</h3>
-  <{tag} class="{class_name} placeholder{' requires-input' if ordered else ''} auto-field wrap-pre" data-field="{field}">
+  <h3 class="subsection-title">{escape_html_text(title)}</h3>
+  <{tag} class="{class_name} placeholder{' requires-input' if ordered else ''} auto-field wrap-pre" data-field="{escape_html_attr(sanitize_data_field(field))}">
 {render_li_items(items, "    ")}
   </{tag}>
 </div>
@@ -1805,10 +2117,10 @@ def render_retest_block(finding: dict[str, object]) -> Block:
   <div class="retest-box keep-together">
     <table style="margin: 0">
       <tbody>
-        <tr><td width="18%" style="background: #f0f6ff; font-weight: bold">재점검일</td><td class="placeholder auto-field wrap-anywhere" data-field="finding.retestDate">{finding['retest_date']}</td></tr>
-        <tr><td style="background: #f0f6ff; font-weight: bold">재점검 결과</td><td class="placeholder auto-field wrap-anywhere" data-field="finding.retestResult">{finding['retest_result']}</td></tr>
-        <tr><td style="background: #f0f6ff; font-weight: bold">확인 내용</td><td class="placeholder auto-field wrap-anywhere wrap-pre" data-field="finding.retestNote">{finding['retest_note']}</td></tr>
-        <tr><td style="background: #f0f6ff; font-weight: bold">비고</td><td class="placeholder auto-field wrap-anywhere wrap-pre" data-field="finding.note">{finding['note']}</td></tr>
+        <tr><td width="18%" style="background: #f0f6ff; font-weight: bold">재점검일</td><td class="placeholder auto-field wrap-anywhere" data-field="finding.retestDate">{escape_html_text(finding.get('retest_date', ''))}</td></tr>
+        <tr><td style="background: #f0f6ff; font-weight: bold">재점검 결과</td><td class="placeholder auto-field wrap-anywhere" data-field="finding.retestResult">{escape_html_text(finding.get('retest_result', ''))}</td></tr>
+        <tr><td style="background: #f0f6ff; font-weight: bold">확인 내용</td><td class="placeholder auto-field wrap-anywhere wrap-pre" data-field="finding.retestNote">{escape_html_text(finding.get('retest_note', ''))}</td></tr>
+        <tr><td style="background: #f0f6ff; font-weight: bold">비고</td><td class="placeholder auto-field wrap-anywhere wrap-pre" data-field="finding.note">{escape_html_text(finding.get('note', ''))}</td></tr>
       </tbody>
     </table>
   </div>
@@ -1850,39 +2162,54 @@ def render_finding_page(
     finding_index: int,
     page_index: int,
 ) -> str:
-    section_id = "chapter-4-section" if finding_index == 0 and page_index == 0 else f"{finding_toc_key(finding)}-section-{page_index + 1}"
-    section_toc_key = "chapter-4" if finding_index == 0 and page_index == 0 else finding_toc_key(finding) if page_index == 0 else ""
-    section_attr = f' data-toc-key="{section_toc_key}"' if section_toc_key else ""
-    block_id_attr = f' id="{finding_dom_id(finding)}"' if page_index == 0 else ""
-    block_toc_attr = f' data-toc-key="{finding_toc_key(finding)}"' if page_index == 0 else ""
-    block_repeat = ' data-repeat="finding"' if page_index == 0 else ' data-repeat="finding-continuation"'
-    continued_label = (
-        f'<div class="continued-label">상세 결과 계속 · {finding["id"]}</div>'
-        if page_index
-        else ""
+    section_id = "chapter-4-section" if finding_index == 0 and page_index == 0 else sanitize_dom_id(
+        f"{finding_toc_key(finding)}-section-{page_index + 1}",
+        prefix="section",
     )
-    preamble = ""
+    section_toc_key = "chapter-4" if finding_index == 0 and page_index == 0 else finding_toc_key(finding) if page_index == 0 else ""
+    finding_block_id = finding_dom_id(finding) if page_index == 0 else sanitize_dom_id(
+        f"{finding_dom_id(finding)}-continued-{page_index + 1}",
+        prefix="finding",
+    )
+    finding_block_toc_key = finding_toc_key(finding) if page_index == 0 else ""
+    finding_block_repeat = "finding" if page_index == 0 else "finding-continuation"
+    continued_label_fragment = (
+        trusted_html(
+            f'<div class="continued-label">상세 결과 계속 · {escape_html_text(finding.get("id", ""))}</div>'
+        )
+        if page_index
+        else trusted_html("")
+    )
+    section_preamble_fragment = trusted_html("")
     content_blocks = page_blocks
     if finding_index == 0 and page_index == 0 and page_blocks and page_blocks[0].html.lstrip().startswith("<h1 class=\"chapter-title\""):
-        preamble = page_blocks[0].html
+        section_preamble_fragment = trusted_html(page_blocks[0].html)
         content_blocks = page_blocks[1:]
+
+    risk_key = sanitize_risk_key(finding.get("risk_key"))
+    # Safe because the preamble is generated by this module and never built from raw dataset HTML.
+    # Safe because the continuation label is constructed from escaped finding text inside fixed markup.
+    # Safe because block HTML is generated by server-side renderers that already escape untrusted fields.
+    finding_content_fragment = trusted_html(join_blocks([block.html for block in content_blocks], "      "))
 
     return render_template(
         "finding-section.html",
         {
             "section_extra_classes": " report-continuation" if finding_index or page_index else "",
             "section_id": section_id,
-            "section_attr": section_attr,
-            "section_preamble": preamble,
-            "finding_block_attrs": f'{block_id_attr}{block_repeat}{block_toc_attr} data-risk="{finding["risk_key"]}"',
+            "section_toc_key": section_toc_key,
+            "section_preamble_fragment": section_preamble_fragment,
+            "finding_block_id": finding_block_id,
+            "finding_block_repeat": finding_block_repeat,
+            "finding_block_toc_key": finding_block_toc_key,
             "finding_block_extra_classes": " continued-page-block" if page_index else "",
-            "finding_id": finding["id"],
-            "title": finding["title"],
-            "risk_key": finding["risk_key"],
-            "risk_badge_class": risk_badge_class(str(finding["risk_key"])),
-            "risk_label": finding["risk_label"],
-            "continued_label_html": continued_label,
-            "finding_content_html": join_blocks([block.html for block in content_blocks], "      "),
+            "finding_id": finding.get("id", ""),
+            "title": finding.get("title", ""),
+            "risk_key": risk_key,
+            "risk_badge_class": risk_badge_class(risk_key),
+            "risk_label": finding.get("risk_label", ""),
+            "continued_label_fragment": continued_label_fragment,
+            "finding_content_fragment": finding_content_fragment,
         },
     )
 
@@ -2041,15 +2368,16 @@ def target_table_row_units(row: dict[str, str]) -> int:
 def render_target_table_rows(rows: list[dict[str, str]]) -> list[dict[str, object]]:
     rendered: list[dict[str, object]] = []
     for row in rows:
+        safe_target_url = sanitize_display_url(row["target_url"])
         rendered.append(
             {
                 "html": (
                     "      <tr>"
-                    f"<td align=\"center\">{row['number']}</td>"
-                    f"<td class=\"wrap-anywhere wrap-pre\">{escape(row['system_name'])}</td>"
-                    f"<td class=\"wrap-anywhere wrap-pre\">{escape(row['target_url'])}</td>"
-                    f"<td align=\"center\">{escape(row['account_level'])}</td>"
-                    f"<td class=\"wrap-anywhere wrap-pre\">{escape(row['note'])}</td>"
+                    f"<td align=\"center\">{escape_html_text(row['number'])}</td>"
+                    f"<td class=\"wrap-anywhere wrap-pre\">{escape_html_text(row['system_name'])}</td>"
+                    f"<td class=\"wrap-anywhere wrap-pre\">{escape_html_text(safe_target_url)}</td>"
+                    f"<td align=\"center\">{escape_html_text(row['account_level'])}</td>"
+                    f"<td class=\"wrap-anywhere wrap-pre\">{escape_html_text(row['note'])}</td>"
                     "</tr>"
                 ),
                 "units": target_table_row_units(row),
@@ -2131,11 +2459,7 @@ def render_partial(path: Path, dataset: dict[str, object]) -> str:
         rendered = PARTIAL_RENDERERS[marker](dataset).rstrip()
         return indent_block(rendered, match.group("indent"))
 
-    rendered = PARTIAL_MARKER_RE.sub(replace, text)
-    leftover = TEMPLATE_TOKEN_RE.search(rendered)
-    if leftover:
-        raise ValueError(f"Unresolved partial marker '{leftover.group(1)}' in {path}")
-    return rendered
+    return PARTIAL_MARKER_RE.sub(replace, text)
 
 
 PARTIAL_RENDERERS = {
@@ -2160,9 +2484,9 @@ def join_partials(partials: list[Path], dataset: dict[str, object]) -> str:
 def render_document(css: str, body: str, js: str, profile: RenderProfile, dataset_name: str) -> str:
     return (
         "<!DOCTYPE html>\n"
-        f'<html lang="ko" data-theme="light" data-profile="{profile.name}" data-dataset="{dataset_name}" style="{profile_style_vars(profile)}"><head>\n'
+        f'<html lang="ko" data-theme="light" data-profile="{escape_html_attr(profile.name)}" data-dataset="{escape_html_attr(dataset_name)}" style="{escape_html_attr(profile_style_vars(profile))}"><head>\n'
         '    <meta charset="UTF-8">\n'
-        f"    <title>{TITLE}</title>\n"
+        f"    <title>{escape_html_text(TITLE)}</title>\n"
         "    <style>\n"
         f"{css}"
         "    </style>\n"
@@ -2204,7 +2528,13 @@ def minimal_html_for_section(section_html: str, source_html: str) -> str:
     )
 
 
-def probe_section_pdf_spans(html: str, dataset_name: str, *, limit: int = 20) -> dict[str, object]:
+def probe_section_pdf_spans(
+    html: str,
+    dataset_name: str,
+    *,
+    limit: int = 20,
+    allow_local_file_access: bool = False,
+) -> dict[str, object]:
     page_sections = extract_print_sections(html)
     if not page_sections:
         return {"status": "미검증", "reason": "print-page-start section 없음"}
@@ -2225,7 +2555,11 @@ def probe_section_pdf_spans(html: str, dataset_name: str, *, limit: int = 20) ->
         write_text(temp_html, minimal_html_for_section(section_html, html))
         if temp_pdf.exists():
             temp_pdf.unlink()
-        pdf_result = build_pdf(temp_html.resolve(), temp_pdf.resolve())
+        pdf_result = build_pdf(
+            temp_html.resolve(),
+            temp_pdf.resolve(),
+            allow_local_file_access=allow_local_file_access,
+        )
         temp_html.unlink(missing_ok=True)
         temp_pdf.unlink(missing_ok=True)
         if pdf_result.get("status") != "OK":
@@ -2299,6 +2633,7 @@ def run_layout_probe(
     css: str,
     profile: RenderProfile,
     dataset_name: str,
+    allow_local_file_access: bool = False,
 ) -> dict[str, object]:
     browser = resolve_browser_executable()
     if not browser:
@@ -2324,14 +2659,11 @@ def run_layout_probe(
 
         result = run_browser_process(
             browser,
-            [
-            "--headless=new",
-            "--disable-gpu",
-            "--allow-file-access-from-files",
-            "--dump-dom",
-            "--virtual-time-budget=6000",
-            browser_file_uri(temp_path, browser),
-            ],
+            layout_probe_browser_args(
+                temp_path,
+                browser,
+                allow_local_file_access=allow_local_file_access,
+            ),
             timeout=120,
             stdout_path=stdout_path,
         )
@@ -2522,7 +2854,7 @@ def collect_image_validation(dataset: dict[str, object], profile: RenderProfile)
         candidates.append((f"APPENDIX::{evidence['evidence_id']}", evidence))
 
     for label, item in candidates:
-        image_src = str(item.get("image_src") or "")
+        image_src = sanitize_image_src(item.get("image_src"))
         if not image_src:
             continue
         if "data:image/svg+xml" in image_src:
@@ -2709,22 +3041,62 @@ def path_page_count(pdf_path: Path) -> int | None:
     return len(re.findall(rb"/Type\s*/Page\b", data))
 
 
-def build_pdf(html_path: Path, pdf_path: Path) -> dict[str, object]:
+def file_access_browser_flags(*, allow_local_file_access: bool = False) -> list[str]:
+    return ["--allow-file-access-from-files"] if allow_local_file_access else []
+
+
+def layout_probe_browser_args(
+    html_path: Path,
+    browser: str,
+    *,
+    allow_local_file_access: bool = False,
+) -> list[str]:
+    return [
+        "--headless=new",
+        "--disable-gpu",
+        *file_access_browser_flags(allow_local_file_access=allow_local_file_access),
+        "--dump-dom",
+        "--virtual-time-budget=6000",
+        browser_file_uri(html_path, browser),
+    ]
+
+
+def pdf_browser_args(
+    html_path: Path,
+    pdf_path: Path,
+    browser: str,
+    *,
+    allow_local_file_access: bool = False,
+) -> list[str]:
+    return [
+        "--headless=new",
+        "--disable-gpu",
+        *file_access_browser_flags(allow_local_file_access=allow_local_file_access),
+        *PDF_HEADER_SUPPRESSION_FLAGS,
+        f"--print-to-pdf={browser_file_argument(pdf_path, browser)}",
+        "--virtual-time-budget=4000",
+        browser_file_uri(html_path, browser),
+    ]
+
+
+def build_pdf(
+    html_path: Path,
+    pdf_path: Path,
+    *,
+    allow_local_file_access: bool = False,
+) -> dict[str, object]:
     browser = resolve_browser_executable()
     if not browser:
         return {"status": "미검증", "reason": "headless browser 미탐지"}
     pdf_path.parent.mkdir(parents=True, exist_ok=True)
     if pdf_path.exists():
         pdf_path.unlink()
-    args = [
-        "--headless=new",
-        "--disable-gpu",
-        "--allow-file-access-from-files",
-        *PDF_HEADER_SUPPRESSION_FLAGS,
-        f"--print-to-pdf={browser_file_argument(pdf_path, browser)}",
-        "--virtual-time-budget=4000",
-        browser_file_uri(html_path, browser),
-    ]
+    args = pdf_browser_args(
+        html_path,
+        pdf_path,
+        browser,
+        allow_local_file_access=allow_local_file_access,
+    )
     if browser_is_windows_executable(browser) and powershell_executable():
         windows_browser = to_windows_path(Path(browser)) or browser
         arg_list = "@(" + ",".join(shell_single_quote(arg) for arg in args) + ")"
@@ -2768,20 +3140,36 @@ def build_dataset(
     css: str,
     js: str,
     profile_override: str | None = None,
+    *,
+    allow_local_file_access: bool = False,
 ) -> dict[str, object]:
     profile = resolve_profile(dataset_name, profile_override)
     dataset = load_dataset(dataset_name, profile)
     body = join_partials(partials, dataset)
     html_source = render_document(css=css, body=body, js=js, profile=profile, dataset_name=dataset_name)
-    section_span_probe = probe_section_pdf_spans(html_source, dataset_name)
+    section_span_probe = probe_section_pdf_spans(
+        html_source,
+        dataset_name,
+        allow_local_file_access=allow_local_file_access,
+    )
     build_page_map_data = build_page_map(html_source, section_span_probe=section_span_probe)
-    layout_probe = run_layout_probe(body=body, css=css, profile=profile, dataset_name=dataset_name)
+    layout_probe = run_layout_probe(
+        body=body,
+        css=css,
+        profile=profile,
+        dataset_name=dataset_name,
+        allow_local_file_access=allow_local_file_access,
+    )
     page_map = merge_page_maps(build_page_map_data, layout_probe=layout_probe)
     html = replace_page_tokens(html_source, page_map)
 
     html_path, pdf_path, validation_path = dataset_output_paths(dataset_name)
     write_text(html_path, html)
-    pdf_result = build_pdf(html_path, pdf_path)
+    pdf_result = build_pdf(
+        html_path,
+        pdf_path,
+        allow_local_file_access=allow_local_file_access,
+    )
     validation = validate_print_safety(
         html,
         dataset,
@@ -2820,7 +3208,13 @@ def build_dataset(
     }
 
 
-def build_table_sample(css: str, js: str, profile_override: str | None = None) -> dict[str, object]:
+def build_table_sample(
+    css: str,
+    js: str,
+    profile_override: str | None = None,
+    *,
+    allow_local_file_access: bool = False,
+) -> dict[str, object]:
     profile = resolve_profile("real-assets", profile_override)
     dataset_stub = {
         "findings": [],
@@ -2830,15 +3224,29 @@ def build_table_sample(css: str, js: str, profile_override: str | None = None) -
     }
     body = render_target_table_sample_sections(profile)
     html_source = render_document(css=css, body=body, js=js, profile=profile, dataset_name="table-sample")
-    section_span_probe = probe_section_pdf_spans(html_source, "table-sample")
+    section_span_probe = probe_section_pdf_spans(
+        html_source,
+        "table-sample",
+        allow_local_file_access=allow_local_file_access,
+    )
     build_page_map_data = build_page_map(html_source, section_span_probe=section_span_probe)
-    layout_probe = run_layout_probe(body=body, css=css, profile=profile, dataset_name="table-sample")
+    layout_probe = run_layout_probe(
+        body=body,
+        css=css,
+        profile=profile,
+        dataset_name="table-sample",
+        allow_local_file_access=allow_local_file_access,
+    )
     page_map = merge_page_maps(build_page_map_data, layout_probe=layout_probe)
     html = replace_page_tokens(html_source, page_map)
 
     html_path, pdf_path, validation_path = table_sample_output_paths()
     write_text(html_path, html)
-    pdf_result = build_pdf(html_path, pdf_path)
+    pdf_result = build_pdf(
+        html_path,
+        pdf_path,
+        allow_local_file_access=allow_local_file_access,
+    )
     validation = validate_print_safety(
         html,
         dataset_stub,
@@ -2892,6 +3300,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         default=None,
         help="Override the default render profile for the selected dataset(s).",
     )
+    parser.add_argument(
+        "--allow-local-file-access",
+        action="store_true",
+        help="Development-only opt-in for Chromium file:// access. Disabled by default for report builds.",
+    )
     return parser.parse_args(argv)
 
 
@@ -2906,9 +3319,18 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Source partials: {len(partials)}")
     print(f"Bundled CSS files: {', '.join(CSS_ORDER)}")
     print(f"Bundled JS files: {', '.join(JS_ORDER)}")
+    if args.allow_local_file_access:
+        print("Warning: --allow-local-file-access enabled for this build")
 
     for dataset_name in targets:
-        result = build_dataset(dataset_name, partials, css, js, profile_override=args.profile)
+        result = build_dataset(
+            dataset_name,
+            partials,
+            css,
+            js,
+            profile_override=args.profile,
+            allow_local_file_access=args.allow_local_file_access,
+        )
         print(f"Built {result['html_path']}")
         print(f"Validation {result['validation_path']}")
         print(f"Profile {result['validation']['profile']}")
@@ -2929,7 +3351,12 @@ def main(argv: list[str] | None = None) -> int:
         else:
             print("Fixed-height overflow pairs detected: none")
 
-    table_sample = build_table_sample(css, js, profile_override=args.profile)
+    table_sample = build_table_sample(
+        css,
+        js,
+        profile_override=args.profile,
+        allow_local_file_access=args.allow_local_file_access,
+    )
     print(f"Built {table_sample['html_path']}")
     print(f"Validation {table_sample['validation_path']}")
     if table_sample["validation"]["pdf"]["status"] == "OK":

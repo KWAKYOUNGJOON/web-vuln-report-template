@@ -1,15 +1,15 @@
 <!-- === 4장 상세 결과 ([[finding_id]]) === -->
-<section class="report-section print-page-start[[section_extra_classes]] detail-results-section" id="[[section_id]]"[[section_attr]]>
-[[section_preamble]]
-  <div class="vuln-block vuln-detail[[finding_block_extra_classes]]"[[finding_block_attrs]]>
+<section class="report-section print-page-start[[section_extra_classes]] detail-results-section" id="[[section_id]]" data-toc-key="[[section_toc_key]]">
+[[section_preamble_fragment]]
+  <div class="vuln-block vuln-detail[[finding_block_extra_classes]]" id="[[finding_block_id]]" data-repeat="[[finding_block_repeat]]" data-toc-key="[[finding_block_toc_key]]" data-risk="[[risk_key]]">
     <div class="vuln-block-header">
       <span class="auto-field" data-field="finding.id">[[finding_id]]</span>
       <span class="auto-field" data-field="finding.title">[[title]]</span>
       <span class="badge [[risk_badge_class]]" data-risk="[[risk_key]]" data-field="finding.finalRisk">[[risk_label]]</span>
     </div>
     <div class="vuln-block-body vuln-detail-body">
-[[continued_label_html]]
-[[finding_content_html]]
+[[continued_label_fragment]]
+[[finding_content_fragment]]
     </div>
   </div>
 </section>
