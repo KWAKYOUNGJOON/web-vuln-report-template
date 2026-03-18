@@ -1,0 +1,77 @@
+<!-- === 부록 B === -->
+    <section class="report-section print-page-start" id="appendix-b" data-toc-key="appendix-b">
+      <div class="section-bar">부록 B. 점검 기준 참고표</div>
+      <p style="margin-bottom: 10px">본 진단에 적용된 점검 기준 및 참고 자료 목록입니다.</p>
+      <table>
+        <thead>
+          <tr>
+            <th width="15%">구분</th>
+            <th width="45%">기준/참고자료명</th>
+            <th width="25%">발행기관</th>
+            <th width="15%">버전/연도</th>
+          </tr>
+        </thead>
+        <tbody data-repeat="reference-standard">
+          <tr class="auto-repeat" data-repeat="reference-standard">
+            <td align="center">가이드라인</td>
+            <td>주요정보통신기반시설 기술적 취약점 분석·평가 방법 상세가이드</td>
+            <td align="center" class="placeholder auto-field" data-field="references.guide.publisher">{{발행기관}}</td>
+            <td align="center" class="placeholder auto-field" data-field="references.guide.version">{{연도/버전}}</td>
+          </tr>
+          <tr class="auto-repeat" data-repeat="reference-standard">
+            <td align="center">국제표준</td>
+            <td>OWASP Top 10 2021</td>
+            <td align="center">OWASP Foundation</td>
+            <td align="center">2021</td>
+          </tr>
+          <tr class="auto-repeat" data-repeat="reference-standard">
+            <td align="center" class="placeholder">[추가]</td>
+            <td class="placeholder auto-field" data-field="references.extra.name">{{기준명}}</td>
+            <td align="center" class="placeholder auto-field" data-field="references.extra.publisher">{{발행기관}}</td>
+            <td align="center" class="placeholder auto-field" data-field="references.extra.version">{{연도}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-caption" id="table-20" data-toc-key="table-20">[표 20] 점검 기준 참고표</div>
+
+      <div style="margin-top: 25px">
+        <h2 class="section-title">취약점 코드 참고표</h2>
+        <div class="info-note">※ 아래 위험도는 분류 참고용 예시이며, 최종 위험도는 상세 결과에서 실제 영향 범위와 재현 결과를 기준으로 판정합니다.</div>
+        <table style="font-size: 9pt">
+          <thead>
+            <tr>
+              <th width="8%">코드</th>
+              <th width="30%">항목명 (한)</th>
+              <th width="38%">항목명 (영)</th>
+              <th width="16%">기본 위험도(예시)</th>
+            </tr>
+          </thead>
+          <tbody data-repeat="code-reference">
+            <tr data-risk="high"><td align="center">CI</td><td>코드 인젝션</td><td>Code Injection</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+            <tr data-risk="high"><td align="center">SI</td><td>SQL 인젝션</td><td>SQL Injection</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+            <tr data-risk="high"><td align="center">DI</td><td>디렉터리 인덱싱</td><td>Directory Indexing</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+            <tr data-risk="high"><td align="center">EP</td><td>에러 페이지 적용 미흡</td><td>Improper Error Page</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+            <tr data-risk="high"><td align="center">IL</td><td>정보 누출</td><td>Information Leakage</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+            <tr data-risk="high"><td align="center">XS</td><td>크로스사이트 스크립팅</td><td>Cross-Site Scripting (XSS)</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+            <tr data-risk="high"><td align="center">CF</td><td>크로스사이트 요청 위조</td><td>Cross-Site Request Forgery (CSRF)</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+            <tr data-risk="high"><td align="center">SF</td><td>서버사이드 요청 위조</td><td>Server-Side Request Forgery (SSRF)</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+            <tr data-risk="high"><td align="center">BF</td><td>약한 비밀번호 정책</td><td>Weak Password Policy</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+            <tr data-risk="high"><td align="center">IA</td><td>불충분한 인증 절차</td><td>Insufficient Authentication</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+            <tr data-risk="high"><td align="center">IN</td><td>불충분한 권한 검증</td><td>Insufficient Authorization</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+            <tr data-risk="high"><td align="center">PR</td><td>취약한 비밀번호 복구 절차</td><td>Weak Password Recovery</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+            <tr data-risk="high"><td align="center">PV</td><td>프로세스 검증 누락</td><td>Process Validation Failure</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+            <tr data-risk="high"><td align="center">FU</td><td>악성 파일 업로드</td><td>Malicious File Upload</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+            <tr data-risk="high"><td align="center">FD</td><td>파일 다운로드</td><td>File Download</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+            <tr data-risk="high"><td align="center">IS</td><td>불충분한 세션 관리</td><td>Insufficient Session Management</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+            <tr data-risk="high"><td align="center">SN</td><td>데이터 평문 전송</td><td>Sensitive Data Exposure</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+            <tr data-risk="high"><td align="center">CC</td><td>쿠키 변조</td><td>Cookie Manipulation</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+            <tr data-risk="high"><td align="center">AE</td><td>관리자 페이지 노출</td><td>Admin Page Exposure</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+            <tr data-risk="high"><td align="center">AU</td><td>자동화 공격</td><td>Automated Attack</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+            <tr data-risk="high"><td align="center">WM</td><td>불필요한 Method 악용</td><td>Unnecessary HTTP Method</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td></tr>
+          </tbody>
+        </table>
+        <div class="table-caption" id="table-21" data-toc-key="table-21">[표 21] 취약점 코드 참고표</div>
+      </div>
+    </section>
+
+    

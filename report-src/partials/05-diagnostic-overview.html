@@ -1,0 +1,196 @@
+<!-- === 2장 진단 개요 === -->
+    <section class="report-section print-page-start" id="chapter-2-section" data-toc-key="chapter-2">
+      <h1 class="chapter-title" id="chapter-2" data-toc-key="chapter-2">2. 웹 취약점 진단 개요</h1>
+
+      <h2 class="section-title" id="chapter-2-basis" data-toc-key="chapter-2-basis">1) 점검 기준</h2>
+      <p style="margin-bottom: 10px">
+        본 웹 취약점 진단은 「주요정보통신기반시설 기술적 취약점 분석·평가 방법 상세가이드」와 OWASP Top 10 2021을
+        기본 기준으로 활용하였으며, 서비스 특성과 인증/인가 흐름을 고려하여 수동 검증 항목을 추가 반영하였습니다.
+      </p>
+      <div class="info-note auto-field" data-field="methodology.references">
+        참고 기준: 주요정보통신기반시설 기술적 취약점 분석·평가 방법 상세가이드 / OWASP Top 10 2021 / 기관 내부 보안 요구사항
+      </div>
+
+      <h2 class="section-title" id="chapter-2-process" data-toc-key="chapter-2-process">2) 진단 절차</h2>
+      <div class="process-flow-figure">
+        <div class="process-flow-track" role="img" aria-label="정보 수집에서 결과 보고까지 이어지는 웹 취약점 진단 절차 흐름도">
+          <div class="process-step">정보 수집</div>
+          <div class="process-arrow" aria-hidden="true"></div>
+          <div class="process-step">취약점 진단</div>
+          <div class="process-arrow" aria-hidden="true"></div>
+          <div class="process-step">결과 분석</div>
+          <div class="process-arrow" aria-hidden="true"></div>
+          <div class="process-step">보고서 작성</div>
+          <div class="process-arrow" aria-hidden="true"></div>
+          <div class="process-step">결과 보고</div>
+        </div>
+      </div>
+      <div class="figure-caption" id="figure-01" data-toc-key="figure-01">[그림 1] 웹 취약점 진단 절차 흐름도</div>
+
+      <table>
+        <thead>
+          <tr>
+            <th width="20%">절차</th>
+            <th>수행 내용</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td align="center">정보 수집</td>
+            <td>대상 시스템 정보 수집, 인증 구조 파악, 테스트 계정/시나리오 및 진단 환경 구성</td>
+          </tr>
+          <tr>
+            <td align="center">취약점 진단</td>
+            <td>체크리스트 기반 점검, 요청/응답 분석, 기능별 수동 검증 및 자동화 도구 보조 점검</td>
+          </tr>
+          <tr>
+            <td align="center">결과 분석</td>
+            <td>발견 취약점의 재현 가능성, 영향 범위, 악용 조건 및 판정 근거 분석</td>
+          </tr>
+          <tr>
+            <td align="center">보고서 작성</td>
+            <td>취약점별 상세 설명, 재현 절차, 증빙, 대응 방안, 재점검 기준 정리</td>
+          </tr>
+          <tr>
+            <td align="center">결과 보고</td>
+            <td>발견 사항 공유, 조치 우선순위 협의, 재점검 범위 및 일정 조율</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-caption" id="table-09" data-toc-key="table-09">[표 9] 웹 취약점 진단 방법</div>
+
+      <h2 class="section-title" id="chapter-2-tools" data-toc-key="chapter-2-tools">3) 활용 도구</h2>
+      <table>
+        <thead>
+          <tr>
+            <th width="30%">도구명</th>
+            <th width="40%">용도</th>
+            <th width="30%">비고</th>
+          </tr>
+        </thead>
+        <tbody data-repeat="tool-list">
+          <tr class="auto-repeat" data-repeat="tool-list">
+            <td align="center">Burp Suite Community Edition</td>
+            <td>웹 요청/응답 분석, 세션/헤더 검토, 수동 취약점 재현</td>
+            <td>프록시 및 Repeater 중심 사용</td>
+          </tr>
+          <tr class="auto-repeat" data-repeat="tool-list">
+            <td align="center">HexStrike AI</td>
+            <td>점검 자동화 및 결과 분석 보조</td>
+            <td>연계 도구 기반 자동화 프레임워크</td>
+          </tr>
+          <tr class="auto-repeat" data-repeat="tool-list">
+            <td align="center">Nuclei</td>
+            <td>템플릿 기반 취약점 점검</td>
+            <td>보조 점검 도구</td>
+          </tr>
+          <tr class="auto-repeat" data-repeat="tool-list">
+            <td align="center">FFuf</td>
+            <td>디렉터리 및 입력 포인트 탐색</td>
+            <td>콘텐츠 탐색</td>
+          </tr>
+          <tr class="auto-repeat" data-repeat="tool-list">
+            <td align="center">HTTPx</td>
+            <td>웹 서비스 식별 및 응답 확인</td>
+            <td>대상 URL 확인</td>
+          </tr>
+          <tr class="auto-repeat" data-repeat="tool-list">
+            <td align="center">Nikto</td>
+            <td>웹 서버 설정 및 노출 항목 점검</td>
+            <td>서버 구성 점검</td>
+          </tr>
+          <tr class="auto-repeat" data-repeat="tool-list">
+            <td align="center">브라우저 개발자 도구</td>
+            <td>프론트엔드 동작 및 네트워크 요청 분석</td>
+            <td>클라이언트 측 확인</td>
+          </tr>
+          <tr class="auto-repeat" data-repeat="tool-list">
+            <td align="center">수동 점검(Manual Testing)</td>
+            <td>인증, 인가, 세션, 비즈니스 로직 검증</td>
+            <td>핵심 검증 절차</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-caption" id="table-10" data-toc-key="table-10">[표 10] 활용 도구</div>
+    </section>
+
+    <!-- === 2장 진단 개요 (계속) === -->
+    <section class="report-section report-continuation" id="chapter-2-continuation">
+      <h2 class="section-title" id="chapter-2-risk-scale" data-toc-key="chapter-2-risk-scale">4) 위험도 기준</h2>
+      <p>본 보고서의 최종 위험도는 취약점 파급도, 공격 난이도, 악용 선행조건, 영향 범위를 종합적으로 고려하여 판정합니다.</p>
+      <table>
+        <thead>
+          <tr>
+            <th width="20%">위험도</th>
+            <th>판정 기준</th>
+            <th width="15%">표기</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-risk="high">
+            <td align="center"><strong>상(High)</strong></td>
+            <td>인증 우회, 권한 상승, 민감정보 탈취, 시스템 침해 등 직접적인 보안 사고로 이어질 수 있는 경우</td>
+            <td align="center"><span class="badge badge-high" data-risk="high">상</span></td>
+          </tr>
+          <tr data-risk="mid">
+            <td align="center"><strong>중(Medium)</strong></td>
+            <td>조건부 악용이 가능하거나 추가 조합이 필요한 경우로서 단기 내 조치가 필요한 경우</td>
+            <td align="center"><span class="badge badge-mid" data-risk="mid">중</span></td>
+          </tr>
+          <tr data-risk="low">
+            <td align="center"><strong>하(Low)</strong></td>
+            <td>직접적 피해 가능성은 낮으나 보안 강화 및 오남용 예방 관점에서 개선이 필요한 경우</td>
+            <td align="center"><span class="badge badge-low" data-risk="low">하</span></td>
+          </tr>
+          <tr data-risk="ok">
+            <td align="center"><strong>양호</strong></td>
+            <td>취약점이 확인되지 않았으며 보안 요구사항을 충족하는 경우</td>
+            <td align="center"><span class="badge badge-ok" data-risk="ok">양호</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-caption" id="table-11" data-toc-key="table-11">[표 11] 위험도 기준</div>
+
+      <h2 class="section-title checklist-title" id="chapter-2-checklist" data-toc-key="chapter-2-checklist">5) 점검 체크리스트</h2>
+      <p class="keep-with-next">아래 체크리스트는 「주요정보통신기반시설 기술적 취약점 분석·평가 방법 상세가이드」 기반 21개 항목입니다.</p>
+      <div class="info-note">
+        ※ 본 표의 “기본 위험도(예시)”는 항목 성격에 따른 참조값이며, 최종 위험도는 상세 결과에서 실제 재현 결과와 영향 범위를 기준으로 판정합니다.
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th width="8%">코드</th>
+            <th width="24%">항목명</th>
+            <th width="40%">점검 포인트</th>
+            <th width="14%">기본 위험도(예시)</th>
+            <th width="14%">결과</th>
+          </tr>
+        </thead>
+        <tbody data-repeat="checklist-item">
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">CI</td><td>코드 인젝션</td><td>LDAP/OS명령/SSI 등 코드 실행 구문 삽입 후 비인가 실행 가능 여부 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.ci">[양호/취약/해당없음]</td></tr>
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">SI</td><td>SQL 인젝션</td><td>입력값 조작으로 데이터베이스 오류, 정보 노출, 우회 가능 여부 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.si">[양호/취약/해당없음]</td></tr>
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">DI</td><td>디렉터리 인덱싱</td><td>디렉터리 URL 직접 접근 시 목록 노출 여부 및 접근통제 상태 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.di">[양호/취약/해당없음]</td></tr>
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">EP</td><td>에러 페이지 적용 미흡</td><td>예외 상황 유발 시 스택 트레이스, 경로, 시스템 정보 노출 여부 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.ep">[양호/취약/해당없음]</td></tr>
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">IL</td><td>정보 누출</td><td>응답 헤더, 주석, 소스코드, 백업 파일 등에 민감 정보 노출 여부 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.il">[양호/취약/해당없음]</td></tr>
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">XS</td><td>크로스사이트 스크립팅</td><td>입력/출력 구간에서 스크립트 삽입, 저장/반사/DOM 기반 실행 가능 여부 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.xs">[양호/취약/해당없음]</td></tr>
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">CF</td><td>CSRF</td><td>상태 변경 요청에 대한 CSRF 토큰, Origin/Referer 검증 적용 여부 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.cf">[양호/취약/해당없음]</td></tr>
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">SF</td><td>SSRF</td><td>외부 URL 또는 리소스 참조 기능을 통한 내부망/메타데이터 접근 가능 여부 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.sf">[양호/취약/해당없음]</td></tr>
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">BF</td><td>약한 비밀번호 정책</td><td>복잡도, 길이, 잠금 정책, 초기 비밀번호 및 재사용 정책 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.bf">[양호/취약/해당없음]</td></tr>
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">IA</td><td>불충분한 인증 절차</td><td>인증 우회, 세션 없는 접근, 다단계 인증 미적용 등 인증 절차 미흡 여부 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.ia">[양호/취약/해당없음]</td></tr>
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">IN</td><td>불충분한 권한 검증</td><td>직접 객체 참조, URL 추측, 메뉴 우회 등 권한 외 기능 접근 가능 여부 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.in">[양호/취약/해당없음]</td></tr>
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">PR</td><td>취약한 비밀번호 복구</td><td>본인확인 절차, 임시 비밀번호 정책, 토큰 만료/1회성 사용 여부 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.pr">[양호/취약/해당없음]</td></tr>
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">PV</td><td>프로세스 검증 누락</td><td>다단계 프로세스에서 순서 우회, 파라미터 변조, 승인 없이 완료 가능 여부 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.pv">[양호/취약/해당없음]</td></tr>
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">FU</td><td>악성 파일 업로드</td><td>확장자/콘텐츠 타입 우회, 실행 가능한 파일 업로드 및 접근 가능 여부 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.fu">[양호/취약/해당없음]</td></tr>
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">FD</td><td>파일 다운로드</td><td>경로 조작 또는 권한 미검증으로 임의 파일 다운로드 가능 여부 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.fd">[양호/취약/해당없음]</td></tr>
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">IS</td><td>불충분한 세션 관리</td><td>세션 예측, 고정, 장시간 유지, 로그아웃 후 재사용 가능 여부 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.is">[양호/취약/해당없음]</td></tr>
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">SN</td><td>데이터 평문 전송</td><td>로그인 정보, 개인정보, 세션 식별자 등의 암호화 전송 여부 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.sn">[양호/취약/해당없음]</td></tr>
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">CC</td><td>쿠키 변조</td><td>쿠키 값 변조, Secure/HttpOnly/SameSite 미설정 여부 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.cc">[양호/취약/해당없음]</td></tr>
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">AE</td><td>관리자 페이지 노출</td><td>관리자 페이지 직접 접근, 경로 추측, 기본 경로 노출 여부 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.ae">[양호/취약/해당없음]</td></tr>
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">AU</td><td>자동화 공격</td><td>로그인/인증 기능의 반복 시도 제한, CAPTCHA, 이상행위 탐지 여부 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.au">[양호/취약/해당없음]</td></tr>
+          <tr class="auto-repeat" data-repeat="checklist-item" data-risk="high"><td align="center">WM</td><td>불필요한 Method 악용</td><td>PUT, DELETE, TRACE 등 불필요한 HTTP Method 허용 여부 및 제한 정책 점검</td><td align="center"><span class="badge badge-high" data-risk="high">상</span></td><td align="center" class="placeholder auto-field" data-field="checklist.result.wm">[양호/취약/해당없음]</td></tr>
+        </tbody>
+      </table>
+      <div class="table-caption" id="table-12" data-toc-key="table-12">[표 12] 웹 취약점 진단 체크리스트</div>
+    </section>
+
+    

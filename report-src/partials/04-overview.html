@@ -1,0 +1,247 @@
+<!-- === 1장 개요 === -->
+    <section class="report-section print-page-start" id="chapter-1-section" data-toc-key="chapter-1">
+      <h1 class="chapter-title" id="chapter-1" data-toc-key="chapter-1">1. 개요</h1>
+
+      <h2 class="section-title" id="chapter-1-purpose" data-toc-key="chapter-1-purpose">1) 목적</h2>
+      <p style="margin-bottom: 15px" class="auto-field" data-field="overview.purpose">
+        본 웹 취약점 진단은 {{기관명}}의 웹 서비스에 존재하는 보안 취약점을 식별하고, 이에 대한 실증 분석 및 대응방안을
+        제시함으로써 정보보호 수준을 제고하는 것을 목적으로 합니다.
+      </p>
+      <div class="info-note placeholder requires-input auto-field" data-field="overview.purposeNote">[보고 대상, 업무 중요도, 결과 활용 목적 등 기관별 목적 문구를 추가 입력하십시오.]</div>
+
+      <h2 class="section-title" id="chapter-1-control" data-toc-key="chapter-1-control">2) 문서 통제 및 진단 조건</h2>
+      <p>문서 이력, 검토 체계 및 진단 수행 전제조건은 아래와 같이 관리합니다.</p>
+      <table class="doc-control-table">
+        <thead>
+          <tr>
+            <th width="18%">버전</th>
+            <th width="18%">작성일</th>
+            <th width="24%">작성/수정자</th>
+            <th>변경 내용</th>
+          </tr>
+        </thead>
+        <tbody data-repeat="document-history">
+          <tr class="auto-repeat" data-repeat="document-history">
+            <td align="center" class="placeholder requires-input auto-field" data-field="history.version">{{문서버전}}</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="history.date">{{작성일}}</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="history.author">{{작성자}}</td>
+            <td class="placeholder requires-input auto-field" data-field="history.changeLog">[초안 작성 / 취약점 결과 반영 / 제출본 확정 등 실제 변경 이력을 입력하십시오.]</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-caption" id="table-01" data-toc-key="table-01">[표 1] 문서 이력</div>
+
+      <table class="doc-control-table">
+        <thead>
+          <tr>
+            <th width="20%">구분</th>
+            <th width="25%">소속/부서</th>
+            <th width="20%">성명</th>
+            <th width="15%">상태</th>
+            <th width="20%">비고</th>
+          </tr>
+        </thead>
+        <tbody data-repeat="approval-line">
+          <tr class="auto-repeat" data-repeat="approval-line">
+            <td align="center">작성</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="approval.authorDept">{{수행기관}}</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="approval.authorName">{{작성자}}</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="approval.authorStatus">[작성 완료]</td>
+            <td class="placeholder auto-field" data-field="approval.authorNote">[초안 작성자 또는 책임 컨설턴트 입력]</td>
+          </tr>
+          <tr class="auto-repeat" data-repeat="approval-line">
+            <td align="center">검토</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="approval.reviewerDept">{{검토부서}}</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="approval.reviewerName">{{검토자}}</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="approval.reviewerStatus">[검토 예정/완료]</td>
+            <td class="placeholder auto-field" data-field="approval.reviewerNote">[기술 검토, 품질 검토 등 검토 성격 입력]</td>
+          </tr>
+          <tr class="auto-repeat" data-repeat="approval-line">
+            <td align="center">승인</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="approval.approverDept">{{승인부서}}</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="approval.approverName">{{승인자}}</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="approval.approverStatus">[승인 예정/완료]</td>
+            <td class="placeholder auto-field" data-field="approval.approverNote">[제출 승인권자 또는 고객 승인 여부 입력]</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-caption" id="table-02" data-toc-key="table-02">[표 2] 검토 및 승인</div>
+
+      <table class="doc-control-table">
+        <thead>
+          <tr>
+            <th width="22%">구분</th>
+            <th>내용</th>
+            <th width="18%">적용 여부</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td align="center">진단 전제 조건</td>
+            <td class="placeholder requires-input auto-field" data-field="constraints.assumptions">[진단 대상 URL, 허용된 진단 시간대, 네트워크 접근 조건, 테스트용 계정 제공 여부 등을 입력하십시오.]</td>
+            <td align="center" class="placeholder auto-field" data-field="constraints.assumptionsStatus">[적용]</td>
+          </tr>
+          <tr>
+            <td align="center">제외 범위</td>
+            <td class="placeholder requires-input auto-field" data-field="constraints.exclusions">[운영 영향 우려로 제외한 기능, 결제/배치/외부연계 시스템 등 제외 범위를 명시하십시오.]</td>
+            <td align="center" class="placeholder auto-field" data-field="constraints.exclusionsStatus">[해당 시 입력]</td>
+          </tr>
+          <tr>
+            <td align="center">제한 사항</td>
+            <td class="placeholder requires-input auto-field" data-field="constraints.limitations">[CAPTCHA, WAF, 접근제어, 테스트 데이터 부족 등 결과 해석에 영향을 주는 제한 사항을 입력하십시오.]</td>
+            <td align="center" class="placeholder auto-field" data-field="constraints.limitationsStatus">[해당 시 입력]</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-caption" id="table-03" data-toc-key="table-03">[표 3] 진단 전제 및 제한 사항</div>
+
+      <h2 class="section-title" id="chapter-1-scope" data-toc-key="chapter-1-scope">3) 수행 범위</h2>
+      <p>본 진단은 아래 범위를 기준으로 수행되었습니다.</p>
+      <table class="dense-table scope-summary-table">
+        <tbody><tr>
+          <th width="30%">범위 구분</th>
+          <th>내용</th>
+        </tr>
+        <tr>
+          <td align="center">진단 유형</td>
+          <td class="auto-field" data-field="scope.type">웹 애플리케이션 취약점 진단</td>
+        </tr>
+        <tr>
+          <td align="center">진단 방식</td>
+          <td class="auto-field" data-field="scope.method">블랙박스 기반 점검</td>
+        </tr>
+        <tr>
+          <td align="center">진단 계정</td>
+          <td class="placeholder requires-input auto-field" data-field="scope.accountCondition">[일반 사용자 계정 / 관리자 계정 / 비인가 상태 등 실제 계정 조건을 입력하십시오.]</td>
+        </tr>
+        <tr>
+          <td align="center">진단 환경</td>
+          <td class="placeholder requires-input auto-field" data-field="scope.environment">[진단망, 로컬 테스트 환경, 프록시 구성 등 실제 수행 환경을 입력하십시오.]</td>
+        </tr>
+      </tbody></table>
+      <div class="table-caption" id="table-04" data-toc-key="table-04">[표 4] 수행 범위</div>
+
+      <h2 class="section-title" id="chapter-1-targets" data-toc-key="chapter-1-targets">4) 대상</h2>
+      <table class="checklist-table">
+        <thead>
+          <tr>
+            <th width="10%">번호</th>
+            <th width="25%">시스템명</th>
+            <th width="35%">대상 URL</th>
+            <th width="15%">계정 수준</th>
+            <th width="15%">비고</th>
+          </tr>
+        </thead>
+        <tbody data-repeat="target-system">
+          <tr class="auto-repeat" data-repeat="target-system">
+            <td align="center">1</td>
+            <td class="placeholder requires-input auto-field" data-field="target.name">{{시스템명}}</td>
+            <td class="placeholder requires-input auto-field" data-field="target.url">{{대상URL}}</td>
+            <td align="center" class="placeholder auto-field" data-field="target.accountLevel">[일반/관리자]</td>
+            <td class="placeholder auto-field" data-field="target.note">[운영/개발, API 포함 여부 등 비고 입력]</td>
+          </tr>
+          <tr class="auto-repeat" data-repeat="target-system">
+            <td align="center">2</td>
+            <td class="placeholder requires-input auto-field" data-field="target.name">{{시스템명}}</td>
+            <td class="placeholder requires-input auto-field" data-field="target.url">{{대상URL}}</td>
+            <td align="center" class="placeholder auto-field" data-field="target.accountLevel">[비인가/일반/관리자]</td>
+            <td class="placeholder auto-field" data-field="target.note">[필요 시 추가 대상 정보를 입력하십시오.]</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-caption" id="table-05" data-toc-key="table-05">[표 5] 웹 취약점 진단 대상</div>
+
+      <h2 class="section-title" id="chapter-1-schedule" data-toc-key="chapter-1-schedule">5) 일정</h2>
+      <table>
+        <thead>
+          <tr>
+            <th width="20%">절차</th>
+            <th width="25%">일정</th>
+            <th width="20%">산출물</th>
+            <th>내용</th>
+          </tr>
+        </thead>
+        <tbody data-repeat="schedule-step">
+          <tr class="auto-repeat" data-repeat="schedule-step">
+            <td align="center">사전 준비</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="schedule.prep">{{사전준비일정}}</td>
+            <td align="center">진단계획</td>
+            <td>범위 선정, 계정 확인, 테스트 환경 점검, 커뮤니케이션 체계 확정</td>
+          </tr>
+          <tr class="auto-repeat" data-repeat="schedule-step">
+            <td align="center">취약점 진단</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="schedule.assessment">{{진단기간}}</td>
+            <td align="center">점검 결과</td>
+            <td>웹 취약점 진단, 취약 여부 검증, 재현 로그 및 증빙 확보</td>
+          </tr>
+          <tr class="auto-repeat" data-repeat="schedule-step">
+            <td align="center">보고서 작성</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="schedule.reporting">{{보고서작성일}}</td>
+            <td align="center">보고서 초안</td>
+            <td>취약점별 상세 내용, 영향 범위, 대응 권고안 및 증빙 정리</td>
+          </tr>
+          <tr class="auto-repeat" data-repeat="schedule-step">
+            <td align="center">결과 보고</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="schedule.presentation">{{결과보고일}}</td>
+            <td align="center">최종본</td>
+            <td>결과 설명, 조치 우선순위 협의, 재점검 계획 공유</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-caption" id="table-06" data-toc-key="table-06">[표 6] 절차 및 일정</div>
+
+      <h2 class="section-title" id="chapter-1-personnel" data-toc-key="chapter-1-personnel">6) 수행 인력</h2>
+      <table>
+        <thead>
+          <tr>
+            <th width="20%">소속</th>
+            <th width="18%">성명</th>
+            <th width="20%">역할</th>
+            <th width="20%">책임 범위</th>
+            <th width="22%">연락처</th>
+          </tr>
+        </thead>
+        <tbody data-repeat="team-member">
+          <tr class="auto-repeat" data-repeat="team-member">
+            <td align="center" class="placeholder requires-input auto-field" data-field="team.org">{{수행기관}}</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="team.name">{{성명}}</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="team.role">{{PM/진단책임자}}</td>
+            <td class="placeholder auto-field" data-field="team.scope">[범위 승인, 결과 검토, 대외 보고 등 책임 범위를 입력하십시오.]</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="team.contact">{{이메일/전화}}</td>
+          </tr>
+          <tr class="auto-repeat" data-repeat="team-member">
+            <td align="center" class="placeholder requires-input auto-field" data-field="team.org">{{수행기관}}</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="team.name">{{성명}}</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="team.role">{{컨설턴트}}</td>
+            <td class="placeholder auto-field" data-field="team.scope">[취약점 재현, 증빙 정리, 대응 권고안 작성 등 입력]</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="team.contact">{{이메일/전화}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-caption" id="table-07" data-toc-key="table-07">[표 7] 수행 인력</div>
+
+      <h2 class="section-title" id="chapter-1-location" data-toc-key="chapter-1-location">7) 수행 장소</h2>
+      <table>
+        <thead>
+          <tr>
+            <th width="20%">장소</th>
+            <th width="32%">주소</th>
+            <th width="18%">진단 IP</th>
+            <th width="15%">접속 방식</th>
+            <th width="15%">비고</th>
+          </tr>
+        </thead>
+        <tbody data-repeat="assessment-location">
+          <tr class="auto-repeat" data-repeat="assessment-location">
+            <td align="center" class="placeholder requires-input auto-field" data-field="location.name">{{수행장소명}}</td>
+            <td class="placeholder requires-input auto-field" data-field="location.address">{{주소}}</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="location.ip">{{진단IP}}</td>
+            <td align="center" class="placeholder auto-field" data-field="location.accessMethod">[사내망/VPN/원격]</td>
+            <td class="placeholder auto-field" data-field="location.note">[방화벽 예외, 망분리 여부 등 입력]</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-caption" id="table-08" data-toc-key="table-08">[표 8] 수행 장소 및 IP 주소</div>
+    </section>
+
+    

@@ -1,0 +1,158 @@
+<!-- === 3장 결과 요약 === -->
+    <section class="report-section print-page-start" id="chapter-3-section" data-toc-key="chapter-3">
+      <h1 class="chapter-title" id="chapter-3" data-toc-key="chapter-3">3. 웹 취약점 진단 결과 요약</h1>
+
+      <h2 class="section-title" id="chapter-3-summary" data-toc-key="chapter-3-summary">1) 전체 취약점 요약</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>구분</th>
+            <th>점검 항목 수</th>
+            <th>취약 건수</th>
+            <th>양호 건수</th>
+            <th>해당없음</th>
+          </tr>
+        </thead>
+        <tbody data-repeat="summary-system">
+          <tr class="auto-repeat" data-repeat="summary-system">
+            <td align="center" class="placeholder requires-input auto-field" data-field="summary.system.name">{{시스템명}}</td>
+            <td align="center" class="placeholder auto-field" data-field="summary.system.total">{{총점검항목}}</td>
+            <td align="center" class="placeholder auto-field" data-field="summary.system.vuln">{{취약건수}}</td>
+            <td align="center" class="placeholder auto-field" data-field="summary.system.ok">{{양호건수}}</td>
+            <td align="center" class="placeholder auto-field" data-field="summary.system.na">{{해당없음}}</td>
+          </tr>
+          <tr class="auto-repeat" data-repeat="summary-system">
+            <td align="center" class="placeholder requires-input auto-field" data-field="summary.system.name">{{시스템명}}</td>
+            <td align="center" class="placeholder auto-field" data-field="summary.system.total">{{총점검항목}}</td>
+            <td align="center" class="placeholder auto-field" data-field="summary.system.vuln">{{취약건수}}</td>
+            <td align="center" class="placeholder auto-field" data-field="summary.system.ok">{{양호건수}}</td>
+            <td align="center" class="placeholder auto-field" data-field="summary.system.na">{{해당없음}}</td>
+          </tr>
+          <tr style="font-weight: bold; background: #eef2f8">
+            <td align="center">합계</td>
+            <td align="center" class="placeholder auto-field" data-field="summary.total.total">{{총점검항목합계}}</td>
+            <td align="center" class="placeholder auto-field" data-field="summary.total.vuln">{{취약합계}}</td>
+            <td align="center" class="placeholder auto-field" data-field="summary.total.ok">{{양호합계}}</td>
+            <td align="center" class="placeholder auto-field" data-field="summary.total.na">{{해당없음합계}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-caption" id="table-13" data-toc-key="table-13">[표 13] 전체 취약점 요약</div>
+
+      <h2 class="section-title" id="chapter-3-risk-summary" data-toc-key="chapter-3-risk-summary">2) 위험도별 현황</h2>
+      <div class="flex-row">
+        <table style="width: 100%">
+          <thead>
+            <tr>
+              <th>위험도</th>
+              <th>건수</th>
+              <th>비율</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-risk="high">
+              <td align="center"><span class="badge badge-high" data-risk="high">상</span></td>
+              <td align="center" class="placeholder auto-field" data-field="summary.risk.high.count">{{상건수}}</td>
+              <td align="center" class="placeholder auto-field" data-field="summary.risk.high.rate">{{상비율}}</td>
+            </tr>
+            <tr data-risk="mid">
+              <td align="center"><span class="badge badge-mid" data-risk="mid">중</span></td>
+              <td align="center" class="placeholder auto-field" data-field="summary.risk.mid.count">{{중건수}}</td>
+              <td align="center" class="placeholder auto-field" data-field="summary.risk.mid.rate">{{중비율}}</td>
+            </tr>
+            <tr data-risk="low">
+              <td align="center"><span class="badge badge-low" data-risk="low">하</span></td>
+              <td align="center" class="placeholder auto-field" data-field="summary.risk.low.count">{{하건수}}</td>
+              <td align="center" class="placeholder auto-field" data-field="summary.risk.low.rate">{{하비율}}</td>
+            </tr>
+            <tr data-risk="ok">
+              <td align="center"><span class="badge badge-ok" data-risk="ok">양호</span></td>
+              <td align="center" class="placeholder auto-field" data-field="summary.risk.ok.count">{{양호건수}}</td>
+              <td align="center" class="placeholder auto-field" data-field="summary.risk.ok.rate">{{양호비율}}</td>
+            </tr>
+            <tr style="font-weight: bold">
+              <td align="center">합계</td>
+              <td align="center" class="placeholder auto-field" data-field="summary.risk.total.count">{{전체건수}}</td>
+              <td align="center" class="placeholder auto-field" data-field="summary.risk.total.rate">100%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-caption" id="table-14" data-toc-key="table-14">[표 14] 위험도별 취약점 현황</div>
+
+      <h2 class="section-title" id="chapter-3-target-summary" data-toc-key="chapter-3-target-summary">3) 대상별 결과 요약</h2>
+      <table>
+        <thead>
+          <tr>
+            <th width="10%">번호</th>
+            <th width="22%">시스템명</th>
+            <th width="18%">관리번호</th>
+            <th width="30%">취약점명</th>
+            <th width="10%">위험도</th>
+            <th width="10%">상태</th>
+          </tr>
+        </thead>
+        <tbody data-repeat="summary-finding">
+          <tr class="auto-repeat" data-repeat="summary-finding" data-risk="high">
+            <td align="center">1</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="summary.finding.system">{{시스템명}}</td>
+            <td align="center" class="placeholder auto-field" data-field="summary.finding.id">{{VUL-001}}</td>
+            <td class="placeholder requires-input auto-field" data-field="summary.finding.title">{{취약점명}}</td>
+            <td align="center"><span class="badge badge-high" data-risk="high">상</span></td>
+            <td align="center" class="placeholder auto-field" data-field="summary.finding.status">{{미조치}}</td>
+          </tr>
+          <tr class="auto-repeat" data-repeat="summary-finding" data-risk="mid">
+            <td align="center">2</td>
+            <td align="center" class="placeholder requires-input auto-field" data-field="summary.finding.system">{{시스템명}}</td>
+            <td align="center" class="placeholder auto-field" data-field="summary.finding.id">{{VUL-002}}</td>
+            <td class="placeholder requires-input auto-field" data-field="summary.finding.title">{{취약점명}}</td>
+            <td align="center"><span class="badge badge-mid" data-risk="mid">중</span></td>
+            <td align="center" class="placeholder auto-field" data-field="summary.finding.status">{{조치중}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-caption" id="table-15" data-toc-key="table-15">[표 15] 대상별 결과 요약</div>
+
+      <h2 class="section-title" id="chapter-3-assessment" data-toc-key="chapter-3-assessment">4) 총평</h2>
+      <div class="text-panel">
+        <p class="placeholder requires-input auto-field" data-field="summary.assessment">
+          [예: 총 {{전체취약건수}}건의 취약점이 식별되었으며, 이 중 상 위험도 {{상건수}}건은 인증/인가 또는 민감정보 노출과 직접 연결되므로 우선 조치가 필요합니다. 중·하 위험도 항목은 서비스 영향도를 고려하여 단기/중기 계획에 따라 개선하는 것이 적절합니다.]
+        </p>
+      </div>
+
+      <h2 class="section-title" id="chapter-3-priority" data-toc-key="chapter-3-priority">5) 조치 우선순위</h2>
+      <div class="info-note">아래 표는 최종 위험도, 악용 난이도, 영향 범위를 기준으로 조치 순서를 정리한 것입니다.</div>
+      <table>
+        <thead>
+          <tr>
+            <th>우선순위</th>
+            <th>관리번호</th>
+            <th>취약점명</th>
+            <th>위험도</th>
+            <th>조치 기한</th>
+            <th>담당자</th>
+          </tr>
+        </thead>
+        <tbody data-repeat="priority-item">
+          <tr class="priority-high auto-repeat" data-repeat="priority-item" data-risk="high">
+            <td align="center">1순위</td>
+            <td align="center" class="placeholder auto-field" data-field="priority.item.id">{{VUL-001}}</td>
+            <td class="placeholder requires-input auto-field" data-field="priority.item.title">{{취약점명}}</td>
+            <td align="center"><span class="badge badge-high" data-risk="high">상</span></td>
+            <td align="center" class="placeholder auto-field" data-field="priority.item.due">{{즉시}}</td>
+            <td align="center" class="placeholder auto-field" data-field="priority.item.owner">{{담당자}}</td>
+          </tr>
+          <tr class="priority-mid auto-repeat" data-repeat="priority-item" data-risk="mid">
+            <td align="center">2순위</td>
+            <td align="center" class="placeholder auto-field" data-field="priority.item.id">{{VUL-002}}</td>
+            <td class="placeholder requires-input auto-field" data-field="priority.item.title">{{취약점명}}</td>
+            <td align="center"><span class="badge badge-mid" data-risk="mid">중</span></td>
+            <td align="center" class="placeholder auto-field" data-field="priority.item.due">{{1개월}}</td>
+            <td align="center" class="placeholder auto-field" data-field="priority.item.owner">{{담당자}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-caption" id="table-16" data-toc-key="table-16">[표 16] 조치 우선순위</div>
+    </section>
+
+    
