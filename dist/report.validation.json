@@ -1,0 +1,193 @@
+{
+  "page_tokens_remaining": 0,
+  "continued_pages": 5,
+  "fixed_height_overflow_pairs": [],
+  "has_keep_together": true,
+  "has_allow_split": true,
+  "has_repeated_table_headers": true,
+  "has_wrap_anywhere": true,
+  "has_pre_wrap": true,
+  "self_contained_checks": [
+    "OK self-contained style/script blocks present",
+    "OK no linked stylesheet/script remains",
+    "OK no @import remains"
+  ],
+  "profile": "normal-compact",
+  "page_map": {
+    "mapped_keys": 61,
+    "exact_keys": 22,
+    "inferred_keys": 39,
+    "probe_shifted_keys": 0,
+    "pdf_level_comparison": "부분 검증",
+    "pdf_level_reason": "section span probe와 실제 PDF 총 페이지 수 비교 (probe=19, pdf=19, delta=0)",
+    "layout_probe": {
+      "status": "미검증",
+      "estimated_total_pages": null,
+      "section_count": 0,
+      "largest_sections": [],
+      "reason": "layout probe 결과 마커 미발견",
+      "section_span_probe": {
+        "status": "OK",
+        "estimated_total_pages": 19,
+        "section_count": 16,
+        "largest_sections": [
+          {
+            "id": "chapter-2-continuation",
+            "start_page": 7,
+            "page_span": 2
+          },
+          {
+            "id": "chapter-4-section",
+            "start_page": 11,
+            "page_span": 2
+          },
+          {
+            "id": "finding-vul-002-section-1",
+            "start_page": 14,
+            "page_span": 2
+          },
+          {
+            "id": "cover-page",
+            "start_page": 1,
+            "page_span": 1
+          },
+          {
+            "id": "toc",
+            "start_page": 2,
+            "page_span": 1
+          }
+        ],
+        "reason": null
+      }
+    },
+    "preview": [
+      {
+        "toc_key": "appendix-a",
+        "page": 17,
+        "source": "section",
+        "confidence": "확정"
+      },
+      {
+        "toc_key": "appendix-b",
+        "page": 18,
+        "source": "section",
+        "confidence": "확정"
+      },
+      {
+        "toc_key": "appendix-c",
+        "page": 19,
+        "source": "section",
+        "confidence": "확정"
+      },
+      {
+        "toc_key": "chapter-1",
+        "page": 4,
+        "source": "section",
+        "confidence": "확정"
+      },
+      {
+        "toc_key": "chapter-1-control",
+        "page": 4,
+        "source": "heading",
+        "confidence": "확정"
+      },
+      {
+        "toc_key": "chapter-1-location",
+        "page": 5,
+        "source": "heading",
+        "confidence": "추정"
+      },
+      {
+        "toc_key": "chapter-1-personnel",
+        "page": 5,
+        "source": "heading",
+        "confidence": "추정"
+      },
+      {
+        "toc_key": "chapter-1-purpose",
+        "page": 4,
+        "source": "heading",
+        "confidence": "확정"
+      },
+      {
+        "toc_key": "chapter-1-schedule",
+        "page": 5,
+        "source": "heading",
+        "confidence": "추정"
+      },
+      {
+        "toc_key": "chapter-1-scope",
+        "page": 4,
+        "source": "heading",
+        "confidence": "추정"
+      },
+      {
+        "toc_key": "chapter-1-targets",
+        "page": 5,
+        "source": "heading",
+        "confidence": "확정"
+      },
+      {
+        "toc_key": "chapter-2",
+        "page": 6,
+        "source": "section",
+        "confidence": "확정"
+      }
+    ],
+    "max_mapped_page": 19,
+    "within_pdf_page_count": true,
+    "pdf_page_delta": 0
+  },
+  "pagination_summary": {
+    "print_page_start_sections": 16,
+    "toc_sections": 1,
+    "index_sections": 1,
+    "finding_sections": 3,
+    "countermeasure_sections": 1,
+    "appendix_c_sections": 1,
+    "pdf_page_count": 19,
+    "spill_pages": 3
+  },
+  "image_validation": {
+    "mode": "placeholder-or-vector",
+    "items": [],
+    "summary": {
+      "total": 0,
+      "png_count": 0,
+      "jpeg_count": 0,
+      "all_readable_by_threshold": null,
+      "validation_basis": "추정 기반: 이미지 픽셀 수와 print max-height를 기준으로 유효 PPI를 계산"
+    }
+  },
+  "pdf": {
+    "status": "OK",
+    "page_count": 19,
+    "path": "/mnt/d/취약점-보고서/dist/report.pdf",
+    "browser": "/mnt/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
+  },
+  "dataset": "default",
+  "reference_checks": [
+    "WARN [default:root] section count: reference=13, dist=16",
+    "WARN [default:root] data-field count: reference=308, dist=311",
+    "WARN [default:root] data-repeat count: reference=136, dist=134",
+    "WARN [default:root] placeholder class count: reference=244, dist=250",
+    "WARN [default:root] requires-input class count: reference=100, dist=106",
+    "OK [default:root] toc-page class count: reference=58, dist=58",
+    "WARN [default:root] section ids: first mismatch at position 5 (reference='chapter-2-section', dist='chapter-1-continuation')",
+    "OK [default:root] section toc keys: sequence preserved (12 items)",
+    "OK [default:root] heading ids: sequence preserved (25 items)",
+    "OK [default:root] heading toc keys: sequence preserved (25 items)"
+  ],
+  "baseline_checks": [
+    "WARN [default:baseline] section count: reference=13, dist=16",
+    "WARN [default:baseline] data-field count: reference=308, dist=311",
+    "WARN [default:baseline] data-repeat count: reference=136, dist=134",
+    "WARN [default:baseline] placeholder class count: reference=244, dist=250",
+    "WARN [default:baseline] requires-input class count: reference=100, dist=106",
+    "OK [default:baseline] toc-page class count: reference=58, dist=58",
+    "WARN [default:baseline] section ids: first mismatch at position 5 (reference='chapter-2-section', dist='chapter-1-continuation')",
+    "OK [default:baseline] section toc keys: sequence preserved (12 items)",
+    "OK [default:baseline] heading ids: sequence preserved (25 items)",
+    "OK [default:baseline] heading toc keys: sequence preserved (25 items)"
+  ]
+}

@@ -14,20 +14,7 @@
           </tr>
         </thead>
         <tbody data-repeat="summary-system">
-          <tr class="auto-repeat" data-repeat="summary-system">
-            <td align="center" class="placeholder requires-input auto-field" data-field="summary.system.name">{{시스템명}}</td>
-            <td align="center" class="placeholder auto-field" data-field="summary.system.total">{{총점검항목}}</td>
-            <td align="center" class="placeholder auto-field" data-field="summary.system.vuln">{{취약건수}}</td>
-            <td align="center" class="placeholder auto-field" data-field="summary.system.ok">{{양호건수}}</td>
-            <td align="center" class="placeholder auto-field" data-field="summary.system.na">{{해당없음}}</td>
-          </tr>
-          <tr class="auto-repeat" data-repeat="summary-system">
-            <td align="center" class="placeholder requires-input auto-field" data-field="summary.system.name">{{시스템명}}</td>
-            <td align="center" class="placeholder auto-field" data-field="summary.system.total">{{총점검항목}}</td>
-            <td align="center" class="placeholder auto-field" data-field="summary.system.vuln">{{취약건수}}</td>
-            <td align="center" class="placeholder auto-field" data-field="summary.system.ok">{{양호건수}}</td>
-            <td align="center" class="placeholder auto-field" data-field="summary.system.na">{{해당없음}}</td>
-          </tr>
+[[summary-system-rows]]
           <tr style="font-weight: bold; background: #eef2f8">
             <td align="center">합계</td>
             <td align="center" class="placeholder auto-field" data-field="summary.total.total">{{총점검항목합계}}</td>
@@ -79,7 +66,10 @@
         </table>
       </div>
       <div class="table-caption" id="table-14" data-toc-key="table-14">[표 14] 위험도별 취약점 현황</div>
+    </section>
 
+    <!-- === 3장 결과 요약 (계속) === -->
+    <section class="report-section print-page-start report-continuation" id="chapter-3-continuation">
       <h2 class="section-title" id="chapter-3-target-summary" data-toc-key="chapter-3-target-summary">3) 대상별 결과 요약</h2>
       <table>
         <thead>
@@ -93,22 +83,7 @@
           </tr>
         </thead>
         <tbody data-repeat="summary-finding">
-          <tr class="auto-repeat" data-repeat="summary-finding" data-risk="high">
-            <td align="center">1</td>
-            <td align="center" class="placeholder requires-input auto-field" data-field="summary.finding.system">{{시스템명}}</td>
-            <td align="center" class="placeholder auto-field" data-field="summary.finding.id">{{VUL-001}}</td>
-            <td class="placeholder requires-input auto-field" data-field="summary.finding.title">{{취약점명}}</td>
-            <td align="center"><span class="badge badge-high" data-risk="high">상</span></td>
-            <td align="center" class="placeholder auto-field" data-field="summary.finding.status">{{미조치}}</td>
-          </tr>
-          <tr class="auto-repeat" data-repeat="summary-finding" data-risk="mid">
-            <td align="center">2</td>
-            <td align="center" class="placeholder requires-input auto-field" data-field="summary.finding.system">{{시스템명}}</td>
-            <td align="center" class="placeholder auto-field" data-field="summary.finding.id">{{VUL-002}}</td>
-            <td class="placeholder requires-input auto-field" data-field="summary.finding.title">{{취약점명}}</td>
-            <td align="center"><span class="badge badge-mid" data-risk="mid">중</span></td>
-            <td align="center" class="placeholder auto-field" data-field="summary.finding.status">{{조치중}}</td>
-          </tr>
+[[summary-finding-rows]]
         </tbody>
       </table>
       <div class="table-caption" id="table-15" data-toc-key="table-15">[표 15] 대상별 결과 요약</div>
@@ -134,22 +109,7 @@
           </tr>
         </thead>
         <tbody data-repeat="priority-item">
-          <tr class="priority-high auto-repeat" data-repeat="priority-item" data-risk="high">
-            <td align="center">1순위</td>
-            <td align="center" class="placeholder auto-field" data-field="priority.item.id">{{VUL-001}}</td>
-            <td class="placeholder requires-input auto-field" data-field="priority.item.title">{{취약점명}}</td>
-            <td align="center"><span class="badge badge-high" data-risk="high">상</span></td>
-            <td align="center" class="placeholder auto-field" data-field="priority.item.due">{{즉시}}</td>
-            <td align="center" class="placeholder auto-field" data-field="priority.item.owner">{{담당자}}</td>
-          </tr>
-          <tr class="priority-mid auto-repeat" data-repeat="priority-item" data-risk="mid">
-            <td align="center">2순위</td>
-            <td align="center" class="placeholder auto-field" data-field="priority.item.id">{{VUL-002}}</td>
-            <td class="placeholder requires-input auto-field" data-field="priority.item.title">{{취약점명}}</td>
-            <td align="center"><span class="badge badge-mid" data-risk="mid">중</span></td>
-            <td align="center" class="placeholder auto-field" data-field="priority.item.due">{{1개월}}</td>
-            <td align="center" class="placeholder auto-field" data-field="priority.item.owner">{{담당자}}</td>
-          </tr>
+[[priority-item-rows]]
         </tbody>
       </table>
       <div class="table-caption" id="table-16" data-toc-key="table-16">[표 16] 조치 우선순위</div>

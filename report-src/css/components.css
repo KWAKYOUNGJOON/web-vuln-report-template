@@ -104,42 +104,40 @@
       .text-panel {
         border: 1px solid #c8d8e8;
         background: #fafcff;
-        min-height: 64px;
+        min-height: 0;
         padding: 12px;
         border-radius: 4px;
-        page-break-inside: avoid;
-        break-inside: avoid;
+        page-break-inside: auto;
+        break-inside: auto;
       }
 
       .evidence-box {
         border: 2px dashed #aac4e0;
         background: #f5f9ff;
-        min-height: 96px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        min-height: 0;
+        display: block;
         color: #7a8ea8;
         font-style: italic;
         margin: 8px 0;
         border-radius: 4px;
-        page-break-inside: avoid;
-        break-inside: avoid;
+        page-break-inside: auto;
+        break-inside: auto;
       }
 
       .evidence-panel {
         margin: 14px 0;
         border: 1px solid #c8d8e8;
         border-radius: 4px;
-        overflow: hidden;
-        page-break-inside: avoid;
-        break-inside: avoid;
+        overflow: visible;
+        page-break-inside: auto;
+        break-inside: auto;
       }
 
       .vuln-block {
         border: 1px solid #c8d8e8;
         border-radius: 4px;
         margin: 12px 0 16px;
-        overflow: hidden;
+        overflow: visible;
         page-break-inside: auto;
         break-inside: auto;
       }
@@ -227,7 +225,7 @@
       .detail-card {
         border: 1px solid #d6e4f7;
         border-radius: 4px;
-        overflow: hidden;
+        overflow: visible;
         background: #fcfdff;
       }
 
@@ -267,7 +265,7 @@
       .evidence-card {
         border: 1px solid #c8d8e8;
         border-radius: 4px;
-        overflow: hidden;
+        overflow: visible;
         background: #fff;
         page-break-inside: avoid;
         break-inside: avoid;
@@ -313,7 +311,34 @@
       }
 
       .evidence-box.large {
-        min-height: 150px;
+        min-height: 0;
+      }
+
+      .evidence-figure {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
+      .evidence-media {
+        padding: 8px;
+        text-align: center;
+      }
+
+      .evidence-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 96px;
+      }
+
+      .evidence-image {
+        display: block;
+        width: auto;
+        max-width: 100%;
+        height: auto;
+        max-height: var(--report-evidence-image-max-height, 155mm);
+        margin: 0 auto;
+        object-fit: contain;
       }
 
       .appendix-evidence-panel {
@@ -341,6 +366,22 @@
         margin-top: 8px;
         font-size: 9pt;
         line-height: 1.45;
+      }
+
+      [data-field*="Url"],
+      [data-field*="url"],
+      [data-field*="path"],
+      [data-field*="request"],
+      [data-field*="response"],
+      [data-field*="parameter"],
+      [data-field*="summary"],
+      [data-field*="description"],
+      [data-field*="note"],
+      [data-field*="action"],
+      [data-field*="retest"],
+      [data-field*="references"] {
+        overflow-wrap: anywhere;
+        word-break: break-word;
       }
 
       .priority-high {

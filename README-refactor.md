@@ -1,115 +1,211 @@
 # Report HTML Refactor
 
-## 개요
+## 목적
 
-- 원본 루트 `report.html`은 보존하고, 수정용 소스는 `report-src/`로 분리했습니다.
-- 배포/인쇄용 산출물은 `python build_report.py` 실행으로 `dist/report.html`에 다시 단일 HTML로 생성됩니다.
-- 런타임 `fetch()`나 외부 partial import는 사용하지 않습니다. 최종 결과물은 self-contained 단일 HTML입니다.
+- 현재 시각 톤과 구조를 유지하면서 PDF 인쇄 안정성을 확보합니다.
+- 최종 산출물은 계속 self-contained 단일 HTML(`dist/*.html`)입니다.
+- normal, real-assets, stress를 서로 다른 출력 프로파일로 관리합니다.
 
-## 디렉터리 구조
+## 출력 프로파일
+
+### `normal-compact`
+
+- 기본 normal 빌드용 프로파일
+- 목표: placeholder 기반 정상 데이터의 페이지 밀도 개선
+- 주요 차이:
+  - TOC / LOT / LOF budget 완화
+  - finding page budget 완화
+  - print 본문 글자 크기와 line-height 소폭 축소
+  - 이미지 max-height 소폭 확대
+
+### `normal-balanced`
+
+- 실제 PNG/JPG 자산 검증용 프로파일
+- 목표: 실제 스크린샷 가독성과 여백의 균형
+- 주요 차이:
+  - normal-compact보다 여백과 budget을 약간 보수적으로 유지
+  - 실제 이미지의 읽기 쉬운 크기를 우선
+
+### `stress-safe`
+
+- stress 데이터셋 전용 프로파일
+- 목표: 페이지 수보다 overflow/clipping 방지 우선
+- 기존 safe 예산 유지
+
+## 현재 산출물
 
 ```text
-report-src/
-  partials/
-    00-audit-panel.html
-    01-cover.html
-    02-toc.html
-    03-figures-tables.html
-    04-overview.html
-    05-diagnostic-overview.html
-    06-summary.html
-    07-details-vul-001.html
-    08-details-vul-002.html
-    09-countermeasures.html
-    10-appendix-a.html
-    11-appendix-b.html
-    12-appendix-c.html
-  css/
-    base.css
-    components.css
-    print.css
-  js/
-    placeholders.js
-    page-tokens.js
-    qa-panel.js
-    init.js
-build_report.py
 dist/
   report.html
+  report.pdf
+  report.validation.json
+  report-real-assets.html
+  report-real-assets.pdf
+  report-real-assets.validation.json
+  report-stress.html
+  report-stress.pdf
+  report-stress.validation.json
+  report-table-sample.html
+  report-table-sample.pdf
+  report-table-sample.validation.json
+  real-asset-samples/
+    vertical-portal-capture.png
+    wide-admin-dashboard.jpg
+    hires-console-view.png
+    dense-response-log.jpg
 ```
-
-## 분리 기준
-
-- `partials/`: 문서 의미 단위로 분리했습니다. 표지, 목차, 각 장, 상세 결과, 부록을 독립 수정 가능하게 유지합니다.
-- `css/base.css`: 리셋, 본문 레이아웃, 제목/문단/테이블 기본 규칙, placeholder 기본 상태 등 공통 기초 규칙입니다.
-- `css/components.css`: 제출 전 점검 패널, 배지, TOC, 취약점 상세 카드, 증빙 패널, 프로세스 도식 등 화면/공통 컴포넌트 규칙입니다.
-- `css/print.css`: 기존 `@media print`와 `@page` 규칙을 그대로 분리했습니다. 페이지 시작, 상세 결과 페이지 나눔, 체크리스트 압축, appendix 보정 규칙이 여기에 있습니다.
-- `js/placeholders.js`: token/placeholder 판정용 정규식과 기본 텍스트 정규화 로직입니다.
-- `js/page-tokens.js`: `data-field="page.*"` 또는 상위 `data-toc-key` 기반 page token 키 추출 로직입니다.
-- `js/qa-panel.js`: unresolved 항목 수집, class 부여, 제출 전 점검 패널 요약/목록 렌더링 로직입니다.
-- `js/init.js`: 기존과 동일하게 문서 하단에서 즉시 실행되도록 IIFE를 닫습니다.
 
 ## 빌드
 
+전체 빌드:
+
 ```bash
-python build_report.py
+python3 build_report.py
 ```
 
-생성 결과:
+개별 빌드:
 
-- `dist/report.html`
+```bash
+python3 build_report.py --dataset default
+python3 build_report.py --dataset real-assets
+python3 build_report.py --dataset stress
+```
 
-빌드 스크립트 동작:
+프로파일 override:
 
-1. `partials/*.html`을 파일명 순서대로 결합합니다.
-2. `css/*.css`를 지정된 순서대로 `<style>`에 inline 삽입합니다.
-3. `js/*.js`를 지정된 순서대로 `<script>`에 inline 삽입합니다.
-4. 가능하면 루트 원본 `report.html`과 핵심 구조 카운트/시퀀스를 자동 비교합니다.
+```bash
+python3 build_report.py --dataset default --profile normal-balanced
+python3 build_report.py --dataset stress --profile stress-safe
+```
 
-## 수정 원칙
+WSL/Linux 메모:
 
-- 실제 수정은 `report-src/`에서만 진행합니다.
-- `dist/report.html`은 빌드 산출물이므로 직접 수정하지 않습니다.
-- 클래스명, `id`, `data-field`, `data-repeat`, `data-toc-key`는 출력 동일성과 스크립트 동작에 직접 연결되어 있으므로 임의 변경을 피합니다.
-- 인쇄 레이아웃 관련 규칙은 먼저 `css/print.css`에서 검토합니다.
+- WSL에서는 `/mnt/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe`를 자동 탐색하여 PDF를 생성합니다.
+- `real-assets`는 Pillow가 없어도 `dist/real-asset-samples/`의 기존 PNG/JPG를 재사용해 빌드할 수 있습니다.
+
+## 이번 라운드 핵심 변경점
+
+### 1. normal 페이지 밀도 조정
+
+- 기본 normal 출력 프로파일을 `normal-compact`로 연결했습니다.
+- TOC와 표/그림 차례가 정상 데이터에서는 1페이지에 수용되도록 budget을 조정했습니다.
+- finding page budget을 소폭 상향하여 정상 데이터 기준 두 번째 취약점의 불필요한 continuation을 제거했습니다.
+- 결과적으로 기본 normal PDF는 기존 22페이지에서 19페이지로 감소했습니다.
+- 추가 미세 조정 실험에서도 19페이지 아래로는 내려가지 않았습니다.
+  - section span probe 기준 실제 2페이지를 쓰는 핵심 구간:
+    - `chapter-2-continuation`
+    - `chapter-4-section`
+    - `finding-vul-002-section-1`
+  - 즉 현재 19페이지는 부록보다 2장 진단 개요와 상세 결과 본문 길이에 의해 고정되는 상태입니다.
+
+### 2. 실제 PNG/JPG 검증 경로 추가
+
+- `real-assets` 데이터셋을 추가했습니다.
+- `dist/real-asset-samples/`에 실제 PNG/JPG 샘플 자산을 생성하고, 이를 `dist/report-real-assets.html`에 data URI로 내장합니다.
+- 포함 케이스:
+  - 세로로 긴 캡처
+  - 가로로 긴 캡처
+  - 해상도가 큰 캡처
+  - 작은 글자가 많은 캡처
+
+### 3. 다중 페이지 표 검증 강화
+
+- Chromium/Edge의 `thead` 반복 규칙만 신뢰하지 않고, build 단계에서 명시적 continuation table을 생성하는 샘플을 추가했습니다.
+- 결과물:
+  - `dist/report-table-sample.html`
+  - `dist/report-table-sample.pdf`
+- 샘플은 `[표 5] 웹 취약점 진단 대상` 구조를 기준으로 28행을 넣어 continuation table을 강제로 생성합니다.
+
+### 4. TOC / page token 검증 분리
+
+- page token은 여전히 build 단계에서 치환합니다.
+- 검증 결과는 `page_map`으로 분리해 기록합니다.
+- `layout probe`는 브라우저별 제약이 있어 보조 경로로만 유지하고, 실제 보정은 `section span probe`를 우선 사용합니다.
+- `section span probe`는 `print-page-start` section을 개별 PDF로 재출력해 실제 page span을 측정합니다.
+  - normal / real-assets / table-sample: 적용
+  - stress: section 수가 많아 `미검증`
+- 분류 기준:
+  - `확정`: section span probe로 보정된 section 시작점, section 상단 근처의 heading / vuln-block
+  - `추정`: table caption, figure caption, 긴 섹션 후반부 heading
+  - `미검증`: stress의 후반 page map, PDF 텍스트 추출 기반의 직접 대조
 
 ## 자동 검증 항목
 
-`python build_report.py` 실행 시 다음 항목을 자동 점검합니다.
+`*.validation.json`에는 아래 항목이 기록됩니다.
 
-- 최종 HTML 내 단일 `<style>`/`<script>` 내장 여부
-- `main.report-document` 및 `submission-audit-panel` 존재 여부
-- `@media print`, `@page` 유지 여부
-- 루트 원본 `report.html` 대비 다음 카운트 일치 여부
-- `<section>` 개수
-- `data-field` 개수
-- `data-repeat` 개수
-- `placeholder`, `requires-input`, `toc-page` class 개수
-- `{{page:*}}` 토큰 개수
-- section id / section `data-toc-key` / heading id / heading `data-toc-key` 순서 일치 여부
+- `page_tokens_remaining`
+- `fixed_height_overflow_pairs`
+- self-contained 여부
+- continuation section 수
+- `page_map` 요약
+- `section_span_probe` 요약
+- `pagination_summary`
+- raster 이미지 검증 결과
+- Edge headless PDF 생성 결과와 page count
 
-## 수동 확인 포인트
+## 실제 이미지 가독성 기준
 
-자동 검증만으로는 브라우저 실제 페이지네이션까지 완전 보장할 수 없습니다. 최종 제출 전 아래 항목을 수동 확인하십시오.
+`report-real-assets.validation.json`의 `image_validation`은 아래 기준으로 계산합니다.
 
-1. 브라우저 화면에서 표지, 목차, 1~5장, 부록 A~C의 간격과 박스 스타일이 기존과 동일한지 확인합니다.
-2. 인쇄 미리보기에서 `print-page-start`가 걸린 섹션이 기존과 같은 페이지 시작 위치를 유지하는지 확인합니다.
-3. 상세 결과(`4장`)에서 각 `vuln-detail` 블록이 기존처럼 개별 페이지 흐름을 유지하는지 확인합니다.
-4. `2장 점검 체크리스트`와 `부록 A 체크리스트`의 폰트/셀 패딩이 과도하게 늘어나지 않았는지 확인합니다.
-5. 제출 전 점검 패널에서 unresolved placeholder / page token 집계가 정상인지 확인합니다.
-6. 목차와 표/그림 차례의 `{{page:*}}` 토큰 표기가 기존과 같은 naming rule을 따르는지 확인합니다.
+- 대상: PNG/JPG만 집계
+- 계산 방식:
+  - 이미지 원본 픽셀 크기
+  - print CSS의 `max-height`
+  - 컨테이너 최대 폭
+  - 위 값을 이용한 유효 PPI 추정
+- 기준:
+  - 일반 캡처: 100 PPI 이상
+  - high-resolution 캡처: 120 PPI 이상
+  - dense-text 캡처: 140 PPI 이상
 
-## 루트 파일 교체 절차
+이 값은 어디까지나 추정 기반 자동 점검입니다. 최종 판정은 PDF 육안 검수가 필요합니다.
 
-수동 검증이 끝난 뒤에만 루트 파일 교체를 진행하십시오.
+## 수동 검수 절차
 
-1. `python build_report.py`
-2. `dist/report.html`을 브라우저와 인쇄 미리보기에서 확인
-3. 필요 시 `report-final.pdf`와 페이지 흐름 비교
-4. 검증 완료 후에만 루트 `report.html` 교체 여부를 결정
+### A. 기본 normal (`dist/report.pdf`)
 
-## 현재 한계
+1. 표지 1페이지 하단 안내문 위치가 이전과 동일한지 확인
+2. TOC / 표 차례 / 그림 차례의 숫자가 실제 PDF 페이지와 일치하는지 확인
+3. 1장, 2장, 3장의 continuation이 과도하지 않고 공백이 비정상적으로 크지 않은지 확인
+4. 상세 결과의 finding continuation이 불필요하게 생기지 않았는지 확인
+5. `chapter-2-continuation`이 실제 2페이지를 쓰는 구조이므로 `[표 11]`, `[표 12]` page number가 PDF와 일치하는지 재확인
+6. `VUL-001`, `VUL-002` 시작 page가 각각 11, 14로 보정되었는지 확인
 
-- 브라우저 엔진별 인쇄 pagination 차이는 코드 자동 비교만으로 완전 검증할 수 없습니다.
-- PDF 기준 시각 차이는 브라우저 headless 렌더링 또는 수동 인쇄 미리보기 확인이 필요합니다.
-- 따라서 시각 동일성은 일부 자동 검증 + 수동 확인 절차를 함께 사용해야 합니다.
+### B. 실제 이미지 (`dist/report-real-assets.pdf`)
+
+1. 모든 PNG/JPG가 셀 밖으로 잘리지 않는지 확인
+2. 세로형 캡처가 과도하게 축소되어 읽기 어려워지지 않는지 확인
+3. dense-text 캡처의 작은 글자가 실제 육안으로 읽을 수 있는지 확인
+4. appendix 이미지와 figure caption이 시각적으로 분리되지 않는지 확인
+5. `appendix-c-*`가 3개 continuation section으로 분리되어도 caption 흐름이 자연스러운지 확인
+
+### C. 표 헤더 (`dist/report-table-sample.pdf`)
+
+1. 각 continuation page에 표 헤더가 다시 출력되는지 확인
+2. caption이 `[표 5] ... (계속)` 형식으로 이어지는지 확인
+3. caption과 표 본문 chunk가 분리되지 않는지 확인
+4. 페이지 간 row clipping이 없는지 확인
+
+## 검증 상태 분류
+
+- `확정 검증`
+  - self-contained
+  - page token 미치환 여부
+  - fixed height + overflow hidden 조합 탐지
+  - explicit continuation section 생성 여부
+  - Edge headless PDF page count
+  - normal / real-assets / table-sample의 section span probe 총 페이지 수 대조
+- `추정 기반 검증`
+  - 실제 PNG/JPG 가독성 PPI 계산
+  - section 내부 후반부 caption / figure / heading의 page map
+- `미검증`
+  - PDF 텍스트 추출 기반 TOC 숫자 직접 대조
+  - 기관 실자산 교체 후 최종 가독성
+  - 브라우저/프린터 드라이버 조합별 렌더링 차이
+  - stress의 section span probe
+
+## 현재 수동 확인 필요 항목
+
+1. 실제 기관 PNG/JPG 교체 후도 현재 real-assets 샘플과 유사한 가독성이 유지되는지
+2. 긴 표/이미지 caption의 실제 PDF page number가 추정과 어긋나지 않는지
+3. 브라우저 버전 차이에 따른 table header 렌더링 차이

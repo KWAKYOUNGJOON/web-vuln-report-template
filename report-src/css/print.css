@@ -8,8 +8,8 @@
         }
 
         body {
-          font-size: 9.5pt;
-          line-height: 1.42;
+          font-size: var(--report-print-body-font-size, 9.5pt);
+          line-height: var(--report-print-line-height, 1.42);
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
         }
@@ -45,6 +45,12 @@
           break-before: page;
         }
 
+        section.report-section.cover-page {
+          min-height: 264mm !important;
+          position: relative;
+          padding-bottom: 22mm !important;
+        }
+
         .cover-page {
           min-height: 264mm;
         }
@@ -61,6 +67,10 @@
         .cover-page > div[style*="margin-top: 50mm"] {
           margin-top: 34mm !important;
           width: 72% !important;
+        }
+
+        .cover-footer-note {
+          bottom: 12mm;
         }
 
         p,
@@ -175,6 +185,32 @@
           break-inside: auto;
         }
 
+        .keep-together,
+        .evidence-figure,
+        .evidence-card,
+        .appendix-evidence-panel,
+        .summary-strip,
+        .risk-rationale,
+        .retest-box {
+          page-break-inside: avoid;
+          break-inside: avoid;
+        }
+
+        .allow-split,
+        .detail-results-section .vuln-detail-section,
+        .detail-results-section .vuln-detail-body,
+        .detail-results-section .vuln-detail,
+        .detail-results-section .evidence-list {
+          page-break-inside: auto;
+          break-inside: auto;
+        }
+
+        .continued-label {
+          margin-bottom: 6px;
+          padding: 3px 8px;
+          font-size: 8pt;
+        }
+
         .detail-results-section {
           margin-bottom: 0;
         }
@@ -276,12 +312,9 @@
           font-size: 8.4pt;
         }
 
-        .detail-results-section .evidence-box {
-          min-height: 72px;
-        }
-
+        .detail-results-section .evidence-box,
         .detail-results-section .evidence-box.large {
-          min-height: 108px;
+          min-height: 0;
         }
 
         .checklist-table {
@@ -333,15 +366,6 @@
           padding: 8px 10px;
         }
 
-        .summary-strip,
-        .risk-rationale,
-        .retest-box,
-        .detail-card,
-        .evidence-card {
-          page-break-inside: avoid;
-          break-inside: avoid;
-        }
-
         .evidence-panel {
           overflow: visible;
           page-break-inside: auto;
@@ -358,10 +382,20 @@
         }
 
         .evidence-box {
-          min-height: 72px !important;
+          min-height: 0 !important;
           margin: 6px 0;
           display: block;
           padding: 8px 10px;
+        }
+
+        .evidence-placeholder {
+          min-height: 64px;
+          line-height: 1.24;
+          padding: 6px 8px;
+        }
+
+        .evidence-image {
+          max-height: var(--report-evidence-image-max-height-print, 145mm);
         }
 
         .process-flow-figure {
@@ -543,7 +577,7 @@
         }
 
         .detail-results-section .evidence-box.large {
-          min-height: 96px;
+          min-height: 0;
         }
 
         #chapter-5-section .info-note {
@@ -560,24 +594,33 @@
         }
 
         #appendix-c .evidence-panel {
-          margin: 8px 0 10px;
+          margin: 6px 0 8px;
         }
 
         #appendix-c .appendix-evidence-body {
-          padding: 8px 10px;
+          padding: 7px 8px;
+        }
+
+        #appendix-c .appendix-evidence-header {
+          padding: 6px 10px;
+          font-size: 8.8pt;
         }
 
         #appendix-c .appendix-evidence-description {
-          margin-top: 6px;
-          font-size: 8.6pt;
+          margin-top: 4px;
+          font-size: 8.4pt;
         }
 
         #appendix-c .evidence-box.large {
-          min-height: 90px;
+          min-height: 0;
+        }
+
+        #appendix-c .evidence-placeholder {
+          min-height: 56px;
         }
 
         #appendix-c .figure-caption {
-          margin-top: 4px;
+          margin-top: 3px;
         }
       }
 
