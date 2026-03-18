@@ -144,7 +144,7 @@ URL_UNSAFE_CHAR_RE = re.compile(r"[\x00-\x20\"'<>`]")
 SAFE_HTML_ATTR_NAME_RE = re.compile(r"^[a-zA-Z_:][a-zA-Z0-9:._-]*$")
 SAFE_DATA_FIELD_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 SAFE_DOM_ID_RE = re.compile(r"[^a-z0-9._:-]+")
-DATA_IMAGE_URL_RE = re.compile(r"^data:image/(?:png|jpe?g|gif|webp|svg\+xml);base64,[A-Za-z0-9+/=]+$", re.I)
+DATA_IMAGE_URL_RE = re.compile(r"^data:image/(?:png|jpe?g|gif|webp);base64,[A-Za-z0-9+/=]+$", re.I)
 TOC_BOLD_MARKER_RE = re.compile(r"font-weight\s*:\s*bold|<\s*(?:strong|b)\b", re.I)
 
 ALLOWED_RISK_KEYS = {"high", "mid", "low"}

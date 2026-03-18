@@ -1,4 +1,5 @@
 import copy
+import re
 import unittest
 from pathlib import Path
 
@@ -104,8 +105,15 @@ class ReportSecurityTest(unittest.TestCase):
     def test_url_policy_blocks_unsafe_schemes(self) -> None:
         self.assertEqual("", build_report.sanitize_image_src('x" onerror="alert(1)'))
         self.assertEqual("", build_report.sanitize_image_src("javascript:alert(1)"))
+        self.assertEqual("", build_report.sanitize_image_src("JaVaScRiPt:alert(1)"))
+        self.assertEqual("", build_report.sanitize_image_src("java\nscript:alert(1)"))
+        self.assertEqual("", build_report.sanitize_image_src("java\tscript:alert(1)"))
+        self.assertEqual("", build_report.sanitize_image_src(" javascript:alert(1)"))
         self.assertEqual("", build_report.sanitize_image_src("file:///etc/passwd"))
+        self.assertEqual("", build_report.sanitize_image_src("data:image/svg+xml;base64,PHN2Zy8+"))
         self.assertEqual("", build_report.sanitize_target_url("vbscript:msgbox(1)"))
+        self.assertEqual("", build_report.sanitize_target_url("JaVaScRiPt:alert(1)"))
+        self.assertEqual("", build_report.sanitize_target_url("java\r\nscript:alert(1)"))
         self.assertEqual(
             "https://example.com/image.png",
             build_report.sanitize_image_src("https://example.com/image.png"),
@@ -118,6 +126,38 @@ class ReportSecurityTest(unittest.TestCase):
             "data:image/png;base64,QUJDRA==",
             build_report.sanitize_image_src("data:image/png;base64,QUJDRA=="),
         )
+
+    def test_mandatory_payloads_do_not_land_in_active_sinks(self) -> None:
+        finding = self.sample_finding()
+        finding["summary"] = '<img src=x onerror=alert(1)>'
+        finding["title"] = "</td><script>alert(1)</script>"
+        finding["target_url"] = "  JaVaScRiPt:alert(1)"
+        finding["repro_steps"] = [
+            "<b>step one</b>",
+            "</li><script>alert(2)</script><li>",
+        ]
+        finding["references"] = ["<a href=javascript:alert(1)>ref</a>"]
+        finding["evidences"][0]["image_src"] = 'x" onerror="alert(1)'
+        finding["evidences"][1]["image_src"] = "file:///etc/passwd"
+
+        page_html = build_report.render_finding_page(
+            finding,
+            build_report.render_finding_blocks(finding, 0),
+            0,
+            0,
+        )
+
+        self.assertIn("&lt;img src=x onerror=alert(1)&gt;", page_html)
+        self.assertIn("&lt;/td&gt;&lt;script&gt;alert(1)&lt;/script&gt;", page_html)
+        self.assertIn("&lt;b&gt;step one&lt;/b&gt;", page_html)
+        self.assertIn("&lt;/li&gt;&lt;script&gt;alert(2)&lt;/script&gt;&lt;li&gt;", page_html)
+        self.assertIn("&lt;a href=javascript:alert(1)&gt;ref&lt;/a&gt;", page_html)
+        self.assertIn(build_report.BLOCKED_URL_TEXT, page_html)
+        self.assertGreaterEqual(page_html.count("evidence-placeholder"), 2)
+        self.assertNotRegex(page_html, re.compile(r"<script\b", re.I))
+        self.assertNotRegex(page_html, re.compile(r"<[^>]+\sonerror\s*=", re.I))
+        self.assertNotRegex(page_html, re.compile(r"""(?:src|href)\s*=\s*["']\s*javascript:""", re.I))
+        self.assertNotRegex(page_html, re.compile(r"""(?:src|href)\s*=\s*["']\s*file:""", re.I))
 
     def test_pdf_build_args_disable_file_access_by_default(self) -> None:
         html_path = Path("report.html")
