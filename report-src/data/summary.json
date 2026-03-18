@@ -1,0 +1,14 @@
+{
+  "systems": [
+    { "system_name": "{{시스템명}}", "total": "{{총점검항목}}", "vuln": "{{취약건수}}", "ok": "{{양호건수}}", "na": "{{해당없음}}" },
+    { "system_name": "{{시스템명}}", "total": "{{총점검항목}}", "vuln": "{{취약건수}}", "ok": "{{양호건수}}", "na": "{{해당없음}}" }
+  ],
+  "findings": [
+    { "number": "1", "system_name": "{{시스템명}}", "finding_id": "{{VUL-001}}", "title": "{{취약점명}}", "risk_key": "high", "risk_label": "상", "status": "{{미조치}}" },
+    { "number": "2", "system_name": "{{시스템명}}", "finding_id": "{{VUL-002}}", "title": "{{취약점명}}", "risk_key": "mid", "risk_label": "중", "status": "{{조치중}}" }
+  ],
+  "priorities": [
+    { "row_class": "priority-high", "rank": "1순위", "finding_id": "{{VUL-001}}", "title": "{{취약점명}}", "risk_key": "high", "risk_label": "상", "due": "{{즉시}}", "owner": "{{담당자}}" },
+    { "row_class": "priority-mid", "rank": "2순위", "finding_id": "{{VUL-002}}", "title": "{{취약점명}}", "risk_key": "mid", "risk_label": "중", "due": "{{1개월}}", "owner": "{{담당자}}" }
+  ]
+}

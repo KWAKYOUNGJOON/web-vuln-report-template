@@ -1,0 +1,18 @@
+<div class="evidence-card auto-repeat" data-repeat="finding-evidence" data-evidence-id="[[evidence_id]]">
+  <div class="evidence-card-header">
+    <span class="evidence-ref">증빙 ID: [[evidence_id]]</span>
+    <span class="placeholder auto-field" data-field="finding.evidence.title">[[title]]</span>
+  </div>
+  <div class="evidence-card-body">
+    <table class="evidence-summary-table">
+      <tbody>
+        <tr><td>[[lead_label]]</td><td class="placeholder auto-field" data-field="finding.evidence.[[lead_field]]">[[lead_text]]</td></tr>
+        <tr><td>요청/응답 요약</td><td class="placeholder auto-field" data-field="finding.evidence.io">[[io_text]]</td></tr>
+        <tr><td>관련 부록</td><td class="auto-field" data-field="finding.evidence.appendixRef">[[appendix_ref]]</td></tr>
+      </tbody>
+    </table>
+    <div class="evidence-box large">[[box_text]]</div>
+    <div class="figure-caption" id="[[figure_id]]" data-toc-key="[[figure_id]]" data-evidence-id="[[evidence_id]]">[[figure_caption]]</div>
+    <div class="caption-inline-note">관련 취약점: <span class="auto-field" data-field="finding.id">[[finding_id]]</span> / 관련 증빙 ID: <span class="evidence-ref">[[evidence_id]]</span></div>
+  </div>
+</div>

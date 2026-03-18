@@ -1,0 +1,38 @@
+[
+  {
+    "evidence_id": "EVD-001",
+    "finding_ref": "[관련 취약점: VUL-001]",
+    "title": "{{증빙제목}}",
+    "finding_id": "VUL-001",
+    "evidence_type": "[스크린샷/패킷 로그/응답 본문/도구 출력]",
+    "body_ref": "4장 상세 결과 · EVD-001",
+    "box_text": "[추가 증빙 이미지 또는 캡처 삽입 — 스크린샷, 패킷 로그, 도구 결과 등]",
+    "figure_id": "figure-05",
+    "figure_caption": "[그림 5] Appendix C 추가 증빙 화면 (#1)",
+    "description": "[해당 증빙이 어떤 재현 단계와 연결되는지, 본문에서 설명되지 않은 보조 근거가 무엇인지 입력하십시오.]"
+  },
+  {
+    "evidence_id": "EVD-002",
+    "finding_ref": "[관련 취약점: VUL-001]",
+    "title": "{{증빙제목}}",
+    "finding_id": "VUL-001",
+    "evidence_type": "[스크린샷/패킷 로그/응답 본문/도구 출력]",
+    "body_ref": "4장 상세 결과 · EVD-002",
+    "box_text": "[추가 증빙 이미지 또는 캡처 삽입]",
+    "figure_id": "figure-06",
+    "figure_caption": "[그림 6] Appendix C 추가 증빙 화면 (#2)",
+    "description": "[보조 응답 전문, 데이터 노출 범위, 추가 파라미터 근거 등을 입력하십시오.]"
+  },
+  {
+    "evidence_id": "EVD-003",
+    "finding_ref": "[관련 취약점: VUL-002]",
+    "title": "{{증빙제목}}",
+    "finding_id": "VUL-002",
+    "evidence_type": "[스크린샷/패킷 로그/응답 본문/도구 출력]",
+    "body_ref": "4장 상세 결과 · EVD-003",
+    "box_text": "[추가 증빙 이미지 또는 캡처 삽입]",
+    "figure_id": "figure-07",
+    "figure_caption": "[그림 7] Appendix C 추가 증빙 화면 (#3)",
+    "description": "[별도 첨부해야 하는 로그, 추가 확인 결과, 재점검 비교 화면 등을 입력하십시오.]"
+  }
+]

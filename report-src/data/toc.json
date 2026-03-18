@@ -1,0 +1,33 @@
+{
+  "main": [
+    { "repeat": "toc-entry", "toc_key": "chapter-1", "label_html": "<span style=\"font-weight: bold\">1. 개요</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-1-purpose", "style": "padding-left: 15px", "label_html": "<span>1) 목적</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-1-control", "style": "padding-left: 15px", "label_html": "<span>2) 문서 통제 및 진단 조건</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-1-scope", "style": "padding-left: 15px", "label_html": "<span>3) 수행 범위</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-1-targets", "style": "padding-left: 15px", "label_html": "<span>4) 대상</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-1-schedule", "style": "padding-left: 15px", "label_html": "<span>5) 일정</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-1-personnel", "style": "padding-left: 15px", "label_html": "<span>6) 수행 인력</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-1-location", "style": "padding-left: 15px", "label_html": "<span>7) 수행 장소</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-2", "style": "margin-top: 10px", "label_html": "<span style=\"font-weight: bold\">2. 웹 취약점 진단 개요</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-2-basis", "style": "padding-left: 15px", "label_html": "<span>1) 점검 기준</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-2-process", "style": "padding-left: 15px", "label_html": "<span>2) 진단 절차</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-2-tools", "style": "padding-left: 15px", "label_html": "<span>3) 활용 도구</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-2-risk-scale", "style": "padding-left: 15px", "label_html": "<span>4) 위험도 기준</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-2-checklist", "style": "padding-left: 15px", "label_html": "<span>5) 점검 체크리스트</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-3", "style": "margin-top: 10px", "label_html": "<span style=\"font-weight: bold\">3. 웹 취약점 진단 결과 요약</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-3-summary", "style": "padding-left: 15px", "label_html": "<span>1) 전체 취약점 요약</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-3-risk-summary", "style": "padding-left: 15px", "label_html": "<span>2) 위험도별 현황</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-3-target-summary", "style": "padding-left: 15px", "label_html": "<span>3) 대상별 결과 요약</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-3-assessment", "style": "padding-left: 15px", "label_html": "<span>4) 총평</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-3-priority", "style": "padding-left: 15px", "label_html": "<span>5) 조치 우선순위</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-4", "style": "margin-top: 10px", "label_html": "<span style=\"font-weight: bold\">4. 웹 취약점 진단 상세 결과</span>" },
+    { "expand": "finding-toc" },
+    { "repeat": "toc-entry", "toc_key": "chapter-5", "style": "margin-top: 10px", "label_html": "<span style=\"font-weight: bold\">5. 보호대책</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-5-short", "style": "padding-left: 15px", "label_html": "<span>1) 단기 조치</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-5-mid", "style": "padding-left: 15px", "label_html": "<span>2) 중기 조치</span>" },
+    { "repeat": "toc-entry", "toc_key": "chapter-5-long", "style": "padding-left: 15px", "label_html": "<span>3) 장기 조치</span>" },
+    { "repeat": "toc-entry", "toc_key": "appendix-a", "style": "margin-top: 10px", "label_html": "<span>[부록] 상세 점검 체크리스트</span>" },
+    { "repeat": "toc-entry", "toc_key": "appendix-b", "label_html": "<span>[부록] 점검 기준 참고표</span>" },
+    { "repeat": "toc-entry", "toc_key": "appendix-c", "label_html": "<span>[부록] 추가 증빙 자료</span>" }
+  ]
+}

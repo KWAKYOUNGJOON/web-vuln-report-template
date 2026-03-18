@@ -1,0 +1,62 @@
+{
+  "short": [
+    {
+      "repeat_name": "mitigation-short",
+      "risk_key": "high",
+      "risk_label": "상",
+      "id_field": "mitigation.short.id",
+      "id_classes": "auto-field",
+      "finding_id": "VUL-001",
+      "title_field": "mitigation.short.title",
+      "title": "{{취약점명}}",
+      "action_field": "mitigation.short.action",
+      "action": "[원인 제거 조치, 설정 변경, 코드 수정, 권한 정책 반영 등 즉시 조치 내용을 입력하십시오.]",
+      "owner_field": "mitigation.short.owner",
+      "owner": "{{담당부서}}",
+      "due_field": "mitigation.short.due",
+      "due": "{{완료예정일}}",
+      "retest_field": "mitigation.short.retest",
+      "retest": "[동일 파라미터/기능 재검증, 회귀 테스트 범위 입력]"
+    }
+  ],
+  "mid": [
+    {
+      "repeat_name": "mitigation-mid",
+      "risk_key": "mid",
+      "risk_label": "중",
+      "id_field": "mitigation.mid.id",
+      "id_classes": "placeholder auto-field",
+      "finding_id": "{{VUL-002}}",
+      "title_field": "mitigation.mid.title",
+      "title": "{{취약점명}}",
+      "action_field": "mitigation.mid.action",
+      "action": "[정책 보강, 검증 로직 정교화, 예외처리 개선 등 중기 조치 내용을 입력하십시오.]",
+      "owner_field": "mitigation.mid.owner",
+      "owner": "{{담당부서}}",
+      "due_field": "mitigation.mid.due",
+      "due": "{{완료예정일}}",
+      "retest_field": "mitigation.mid.retest",
+      "retest": "[조치 후 확인할 재현 절차와 영향 범위를 입력하십시오.]"
+    }
+  ],
+  "long": [
+    {
+      "repeat_name": "mitigation-long",
+      "risk_key": "low",
+      "risk_label": "하",
+      "id_field": "mitigation.long.id",
+      "id_classes": "placeholder auto-field",
+      "finding_id": "{{VUL-00N}}",
+      "title_field": "mitigation.long.title",
+      "title": "{{취약점명}}",
+      "action_field": "mitigation.long.action",
+      "action": "[구조 개선, 공통 모듈 적용, 보안 운영 프로세스 보강 등 장기 과제를 입력하십시오.]",
+      "owner_field": "mitigation.long.owner",
+      "owner": "{{담당부서}}",
+      "due_field": "mitigation.long.due",
+      "due": "{{완료예정일}}",
+      "retest_field": "mitigation.long.retest",
+      "retest": "[장기 과제 완료 후 수행할 점검 범위를 입력하십시오.]"
+    }
+  ]
+}

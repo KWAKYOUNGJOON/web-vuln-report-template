@@ -1,0 +1,127 @@
+<!-- === 4장 상세 결과 ([[finding_id]]) === -->
+<section class="report-section print-page-start[[section_extra_classes]] detail-results-section" id="[[section_id]]" data-toc-key="[[section_toc_key]]">
+[[section_preamble]]
+  <div class="vuln-block vuln-detail auto-repeat" id="[[finding_dom_id]]" data-repeat="finding" data-toc-key="[[finding_toc_key]]" data-risk="[[risk_key]]">
+    <div class="vuln-block-header">
+      <span class="auto-field" data-field="finding.id">[[finding_id]]</span>
+      <span class="auto-field" data-field="finding.title">[[title]]</span>
+      <span class="badge [[risk_badge_class]]" data-risk="[[risk_key]]" data-field="finding.finalRisk">[[risk_label]]</span>
+    </div>
+    <div class="vuln-block-body vuln-detail-body">
+      <div class="detail-grid vuln-detail-meta">
+        <div class="detail-card">
+          <div class="detail-card-title">기본 정보</div>
+          <div class="detail-card-body">
+            <table style="margin: 0">
+              <tbody>
+                <tr><td width="26%" style="background: #f0f6ff; font-weight: bold">관리번호</td><td class="auto-field" data-field="finding.id">[[finding_id]]</td></tr>
+                <tr><td style="background: #f0f6ff; font-weight: bold">대상 시스템</td><td class="placeholder requires-input auto-field" data-field="finding.targetName">[[target_name]]</td></tr>
+                <tr><td style="background: #f0f6ff; font-weight: bold">대상 URL</td><td class="placeholder requires-input auto-field" data-field="finding.targetUrl">[[target_url]]</td></tr>
+                <tr><td style="background: #f0f6ff; font-weight: bold">취약점명</td><td class="placeholder requires-input auto-field" data-field="finding.title">[[title]]</td></tr>
+                <tr><td style="background: #f0f6ff; font-weight: bold">점검 코드</td><td class="placeholder requires-input auto-field" data-field="finding.code">[[code]]</td></tr>
+                <tr><td style="background: #f0f6ff; font-weight: bold">발생 경로</td><td class="placeholder requires-input auto-field" data-field="finding.path">[[path]]</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="detail-meta-stack">
+          <div class="detail-card">
+            <div class="detail-card-title">판정 및 조치 현황</div>
+            <div class="detail-card-body">
+              <table style="margin: 0">
+                <tbody>
+                  <tr><td width="34%" style="background: #f0f6ff; font-weight: bold">진단 결과</td><td class="placeholder auto-field" data-field="finding.result">[[result]]</td></tr>
+                  <tr><td style="background: #f0f6ff; font-weight: bold">최종 위험도</td><td><span class="badge [[risk_badge_class]]" data-risk="[[risk_key]]" data-field="finding.finalRisk">[[risk_label]]</span></td></tr>
+                  <tr><td style="background: #f0f6ff; font-weight: bold">발견일</td><td class="placeholder requires-input auto-field" data-field="finding.discoveredAt">[[discovered_at]]</td></tr>
+                  <tr><td style="background: #f0f6ff; font-weight: bold">조치 기한</td><td class="placeholder requires-input auto-field" data-field="finding.dueAt">[[due_at]]</td></tr>
+                  <tr><td style="background: #f0f6ff; font-weight: bold">조치 상태</td><td class="placeholder auto-field" data-field="finding.status">[[status]]</td></tr>
+                  <tr><td style="background: #f0f6ff; font-weight: bold">담당자</td><td class="placeholder requires-input auto-field" data-field="finding.owner">[[owner]]</td></tr>
+                  <tr><td style="background: #f0f6ff; font-weight: bold">확인자</td><td class="placeholder requires-input auto-field" data-field="finding.reviewer">[[reviewer]]</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-strip">
+        <strong>한 줄 요약</strong><br>
+        <span class="placeholder requires-input auto-field" data-field="finding.summary">[[summary]]</span>
+      </div>
+
+      <div class="vuln-detail-section">
+        <h3 class="subsection-title">취약점 설명</h3>
+        <p class="placeholder requires-input auto-field" data-field="finding.description">[[description]]</p>
+      </div>
+
+      <div class="vuln-detail-section">
+        <h3 class="subsection-title">발생 원인</h3>
+        <p class="placeholder requires-input auto-field" data-field="finding.cause">[[cause]]</p>
+      </div>
+
+      <div class="vuln-detail-section">
+        <h3 class="subsection-title">재현 절차</h3>
+        <table class="evidence-summary-table">
+          <tbody>
+            <tr><td>입력값/파라미터</td><td class="placeholder requires-input auto-field" data-field="finding.repro.parameters">[[repro_parameters]]</td></tr>
+            <tr><td>요청 요약</td><td class="placeholder requires-input auto-field" data-field="finding.repro.request">[[repro_request]]</td></tr>
+            <tr><td>응답 요약</td><td class="placeholder requires-input auto-field" data-field="finding.repro.response">[[repro_response]]</td></tr>
+            <tr><td>주요 증빙 ID</td><td class="auto-field" data-field="finding.evidenceRefs">[[evidence_refs]]</td></tr>
+          </tbody>
+        </table>
+        <ol class="step-list placeholder requires-input auto-field" data-field="finding.repro.steps">
+[[repro_steps_html]]
+        </ol>
+
+        <div class="evidence-list">
+[[evidence_cards_html]]
+        </div>
+      </div>
+
+      <div class="vuln-detail-section">
+        <h3 class="subsection-title">영향 범위</h3>
+        <p class="placeholder requires-input auto-field" data-field="finding.impact">[[impact]]</p>
+      </div>
+
+      <div class="vuln-detail-section">
+        <h3 class="subsection-title">위험도 및 판정 근거</h3>
+        <div class="risk-rationale">
+          <p class="placeholder requires-input auto-field" data-field="finding.riskRationale">[[risk_rationale]]</p>
+          <ul class="tight-list">
+            <li>공격 난이도: <span class="placeholder auto-field" data-field="finding.riskDifficulty">[[risk_difficulty]]</span></li>
+            <li>영향 자산: <span class="placeholder auto-field" data-field="finding.riskAsset">[[risk_asset]]</span></li>
+            <li>선행 조건: <span class="placeholder auto-field" data-field="finding.riskPrecondition">[[risk_precondition]]</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="vuln-detail-section">
+        <h3 class="subsection-title">대응 방안</h3>
+        <ol class="step-list placeholder requires-input auto-field" data-field="finding.remediation">
+[[remediation_steps_html]]
+        </ol>
+      </div>
+
+      <div class="vuln-detail-section">
+        <h3 class="subsection-title">참고 기준</h3>
+        <ul class="tight-list placeholder auto-field" data-field="finding.references">
+[[references_html]]
+        </ul>
+      </div>
+
+      <div class="vuln-detail-section">
+        <h3 class="subsection-title">조치 후 재점검 결과</h3>
+        <div class="retest-box">
+          <table style="margin: 0">
+            <tbody>
+              <tr><td width="18%" style="background: #f0f6ff; font-weight: bold">재점검일</td><td class="placeholder auto-field" data-field="finding.retestDate">[[retest_date]]</td></tr>
+              <tr><td style="background: #f0f6ff; font-weight: bold">재점검 결과</td><td class="placeholder auto-field" data-field="finding.retestResult">[[retest_result]]</td></tr>
+              <tr><td style="background: #f0f6ff; font-weight: bold">확인 내용</td><td class="placeholder auto-field" data-field="finding.retestNote">[[retest_note]]</td></tr>
+              <tr><td style="background: #f0f6ff; font-weight: bold">비고</td><td class="placeholder auto-field" data-field="finding.note">[[note]]</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

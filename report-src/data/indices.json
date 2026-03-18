@@ -1,0 +1,30 @@
+{
+  "tables": [
+    { "repeat": "table-index-entry", "toc_key": "table-01", "label_html": "<span>[표 1] 문서 이력</span>" },
+    { "repeat": "table-index-entry", "toc_key": "table-02", "label_html": "<span>[표 2] 검토 및 승인</span>" },
+    { "repeat": "table-index-entry", "toc_key": "table-03", "label_html": "<span>[표 3] 진단 전제 및 제한 사항</span>" },
+    { "repeat": "table-index-entry", "toc_key": "table-04", "label_html": "<span>[표 4] 수행 범위</span>" },
+    { "repeat": "table-index-entry", "toc_key": "table-05", "label_html": "<span>[표 5] 웹 취약점 진단 대상</span>" },
+    { "repeat": "table-index-entry", "toc_key": "table-06", "label_html": "<span>[표 6] 절차 및 일정</span>" },
+    { "repeat": "table-index-entry", "toc_key": "table-07", "label_html": "<span>[표 7] 수행 인력</span>" },
+    { "repeat": "table-index-entry", "toc_key": "table-08", "label_html": "<span>[표 8] 수행 장소 및 IP 주소</span>" },
+    { "repeat": "table-index-entry", "toc_key": "table-09", "label_html": "<span>[표 9] 웹 취약점 진단 방법</span>" },
+    { "repeat": "table-index-entry", "toc_key": "table-10", "label_html": "<span>[표 10] 활용 도구</span>" },
+    { "repeat": "table-index-entry", "toc_key": "table-11", "label_html": "<span>[표 11] 위험도 기준</span>" },
+    { "repeat": "table-index-entry", "toc_key": "table-12", "label_html": "<span>[표 12] 웹 취약점 진단 체크리스트</span>" },
+    { "repeat": "table-index-entry", "toc_key": "table-13", "label_html": "<span>[표 13] 전체 취약점 요약</span>" },
+    { "repeat": "table-index-entry", "toc_key": "table-14", "label_html": "<span>[표 14] 위험도별 취약점 현황</span>" },
+    { "repeat": "table-index-entry", "toc_key": "table-15", "label_html": "<span>[표 15] 대상별 결과 요약</span>" },
+    { "repeat": "table-index-entry", "toc_key": "table-16", "label_html": "<span>[표 16] 조치 우선순위</span>" },
+    { "repeat": "table-index-entry", "toc_key": "table-17", "label_html": "<span>[표 17] 단기 조치 목록</span>" },
+    { "repeat": "table-index-entry", "toc_key": "table-18", "label_html": "<span>[표 18] 중기 조치 목록</span>" },
+    { "repeat": "table-index-entry", "toc_key": "table-19", "label_html": "<span>[표 19] 장기 조치 목록</span>" },
+    { "repeat": "table-index-entry", "toc_key": "table-20", "label_html": "<span>[표 20] 점검 기준 참고표</span>" },
+    { "repeat": "table-index-entry", "toc_key": "table-21", "label_html": "<span>[표 21] 취약점 코드 참고표</span>" }
+  ],
+  "figures": [
+    { "repeat": "figure-index-entry", "toc_key": "figure-01", "label_html": "<span>[그림 1] 웹 취약점 진단 절차 흐름도</span>" },
+    { "expand": "finding-figures" },
+    { "expand": "appendix-figures" }
+  ]
+}
