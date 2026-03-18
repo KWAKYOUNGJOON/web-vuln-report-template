@@ -3,7 +3,7 @@
 ## 프로젝트 소개
 
 이 저장소는 웹 취약점 진단 결과 보고서를 HTML 기반으로 작성하고, 최종 제출용 PDF까지 함께 생성하기 위한 템플릿입니다.  
-실제 수정은 [`report-src/`](/mnt/d/취약점-보고서/report-src)에서 수행하고, [`build_report.py`](/mnt/d/취약점-보고서/build_report.py)를 실행해 self-contained 단일 HTML과 print-safe PDF를 생성합니다.
+실제 수정은 [`report-src/`](/mnt/d/취약점-보고서/report-src)에서 수행하고, [`build_report.py`](/mnt/d/취약점-보고서/build_report.py)를 실행해 self-contained 단일 HTML과 print-safe PDF를 생성합니다. PDF는 브라우저 `Ctrl+P`가 아니라 headless export로 생성하며, 브라우저 인쇄 메타 머리글/바닥글이 포함되지 않도록 빌드 단계에서 강제합니다.
 
 공개 저장소 기준 기본 제출본은 [`dist/report.html`](/mnt/d/취약점-보고서/dist/report.html)과 [`dist/report.pdf`](/mnt/d/취약점-보고서/dist/report.pdf)입니다. 이 README는 리팩토링 메모가 아니라, 저장소 방문자가 프로젝트 목적, 빌드 방법, 제출 기준 파일을 바로 이해할 수 있도록 현재 사용 기준 중심으로 정리한 문서입니다.
 
@@ -33,7 +33,7 @@
 2. 빌드를 실행합니다.
 
 ```bash
-python build_report.py
+python3 build_report.py --dataset default
 ```
 
 3. 제출 기준 결과물을 [`dist/report.html`](/mnt/d/취약점-보고서/dist/report.html)과 [`dist/report.pdf`](/mnt/d/취약점-보고서/dist/report.pdf)에서 확인합니다.
@@ -44,24 +44,26 @@ python build_report.py
 기본 빌드:
 
 ```bash
-python build_report.py
+python3 build_report.py
 ```
 
 기본 제출본만 다시 생성할 때:
 
 ```bash
-python build_report.py --dataset default
+python3 build_report.py --dataset default
 ```
 
 보조 검증용 출력이 필요할 때:
 
 ```bash
-python build_report.py --dataset real-assets
-python build_report.py --dataset stress
+python3 build_report.py --dataset real-assets
+python3 build_report.py --dataset stress
 ```
 
 - 수정은 [`report-src/`](/mnt/d/취약점-보고서/report-src)에서 진행합니다.
-- 빌드 스크립트는 현재 환경에서 Microsoft Edge headless를 자동 탐지해 PDF를 생성하도록 설계돼 있습니다.
+- 공식 PDF 생성 명령은 `python3 build_report.py --dataset default`입니다.
+- 브라우저 `Ctrl+P` 경로는 브라우저가 시간, 문서 제목, 파일 경로, 쪽수 머리글/바닥글을 붙일 수 있으므로 공식 산출 방식으로 사용하지 않습니다.
+- 빌드 스크립트는 현재 환경에서 Microsoft Edge headless를 자동 탐지해 PDF를 생성하며, 브라우저 플래그로 인쇄 머리글/바닥글을 비활성화합니다.
 - 최종 제출 기준은 [`dist/report.html`](/mnt/d/취약점-보고서/dist/report.html), [`dist/report.pdf`](/mnt/d/취약점-보고서/dist/report.pdf)입니다.
 - 실제 자산으로 교체한 뒤에는 표지 로고, 증빙 이미지 잘림, 긴 표 분할, TOC 페이지 번호를 다시 확인해야 합니다.
 
@@ -104,6 +106,7 @@ python build_report.py --dataset stress
 
 - 실제 기관 로고와 실제 고객 증빙 이미지로 교체한 뒤에는 반드시 재빌드해야 합니다.
 - 최종 제출 전에는 [`dist/report.pdf`](/mnt/d/취약점-보고서/dist/report.pdf)를 기준으로 육안 검수를 권장합니다.
+- 제출용 PDF는 브라우저 `Ctrl+P` 대신 `python3 build_report.py --dataset default` 명령으로 다시 생성해야 합니다.
 - 브라우저 버전이나 사내 PDF 변환기 차이로 줄바꿈, page-break, 표 헤더 반복 결과가 달라질 수 있습니다.
 - `stress` 결과는 품질 보증용 점검 자료이며 제출본이 아닙니다.
 - 템플릿에 남아 있는 placeholder, 예시 취약점, 예시 설명은 실제 결과로 교체한 뒤 외부 전달해야 합니다.

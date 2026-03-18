@@ -54,6 +54,7 @@ BROWSER_EXECUTABLE_CANDIDATES = (
     r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
     r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
 )
+PDF_HEADER_SUPPRESSION_FLAGS = ("--print-to-pdf-no-header", "--no-pdf-header-footer")
 
 REAL_ASSET_SPECS = (
     {
@@ -2719,7 +2720,7 @@ def build_pdf(html_path: Path, pdf_path: Path) -> dict[str, object]:
         "--headless=new",
         "--disable-gpu",
         "--allow-file-access-from-files",
-        "--print-to-pdf-no-header",
+        *PDF_HEADER_SUPPRESSION_FLAGS,
         f"--print-to-pdf={browser_file_argument(pdf_path, browser)}",
         "--virtual-time-budget=4000",
         browser_file_uri(html_path, browser),
